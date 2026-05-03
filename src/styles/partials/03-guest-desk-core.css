@@ -37,7 +37,7 @@
 }
 
 .guest-desk .guest-desk-table.guest-list-guest-table {
-  min-width: 46rem;
+  min-width: 53.5rem;
   table-layout: fixed;
 }
 
@@ -59,6 +59,14 @@
 
 .guest-list-guest-table col.guest-desk-col--tickets {
   width: 6.75rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--invite-mark {
+  width: 7.6rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--entry-mark {
+  width: 6.2rem;
 }
 
 .guest-list-guest-table col.guest-desk-col--tag-entry {
@@ -189,6 +197,20 @@ select.guest-mob-compact__recipient-select {
   max-width: 7rem;
 }
 
+.guest-desk-th--invite-mark,
+.guest-desk-td--invite-mark {
+  text-align: center;
+  vertical-align: middle;
+  padding-inline: 0.2rem !important;
+}
+
+.guest-desk-th--entry-mark,
+.guest-desk-td--entry-mark {
+  text-align: center;
+  vertical-align: middle;
+  padding-inline: 0.2rem !important;
+}
+
 .guest-desk-tickets-readonly {
   font-size: 0.88rem;
   font-weight: 700;
@@ -279,6 +301,88 @@ select.guest-mob-compact__recipient-select {
   min-height: unset;
   width: max-content;
   max-width: 100%;
+}
+
+/* Twilio: כפתור ווטסאפ מאוחד (שליחה / פתיחת צ׳אט) */
+.guest-wa-unified {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+  flex-shrink: 0;
+}
+
+.guest-wa-unified--desk {
+  min-height: 2rem;
+}
+
+.guest-wa-unified--empty,
+.guest-wa-unified--noop {
+  width: 2.25rem;
+  min-height: 2rem;
+  flex-shrink: 0;
+}
+
+.guest-wa-unified__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #15803d;
+  cursor: pointer;
+  font: inherit;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-wa-unified__btn--desk {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+}
+
+.guest-wa-unified__btn:hover:not(:disabled):not(.is-disabled) {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
+
+.guest-wa-unified__btn.is-disabled,
+.guest-wa-unified__btn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  border-color: #d4d4d8;
+  background: #fafafa;
+  color: #a1a1aa;
+}
+
+.guest-wa-unified__btn--err:not(:disabled) {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.guest-wa-unified__ico {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.guest-wa-unified__spin {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 2px solid rgb(21 128 61 / 0.28);
+  border-top-color: #15803d;
+  border-radius: 50%;
+  animation: guest-send-wa-spin 0.65s linear infinite;
 }
 
 .guest-desk-act__ico {
@@ -654,5 +758,228 @@ select.guest-mob-compact__recipient-select {
 .guest-desk-toggle {
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+/* סטטוס הזמנה — segmented 3 מצבים (RTL: ימין לא נשלח, אמצע נשלח, שמאל נצפה) */
+.guest-invite-seg {
+  --thumb: 0;
+  width: 100%;
+  max-width: 7.35rem;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.guest-invite-seg--desk-col {
+  max-width: 7.35rem;
+}
+
+.guest-invite-seg__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  direction: rtl;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f3f4f6;
+  min-height: 2.4rem;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.guest-invite-seg--thumb-not_sent .guest-invite-seg__track {
+  border-color: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.guest-invite-seg--thumb-sent .guest-invite-seg__track {
+  border-color: rgba(0, 0, 0, 0.06);
+  background: #f3f4f6;
+}
+
+.guest-invite-seg--thumb-seen .guest-invite-seg__track {
+  border-color: rgba(37, 99, 235, 0.14);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.guest-invite-seg--mixed .guest-invite-seg__track {
+  border-color: rgba(0, 0, 0, 0.06);
+  background: #f9fafb;
+}
+
+.guest-invite-seg__thumb {
+  position: absolute;
+  z-index: 0;
+  inset-block: 3px;
+  width: calc(100% / 3 - 6px);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  pointer-events: none;
+  transition: inset-inline-start 0.2s ease;
+  inset-inline-start: calc(3px + var(--thumb) * (100% / 3));
+}
+
+.guest-invite-seg__cell {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0.18rem 0.06rem;
+  min-height: 2.4rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-invite-seg__cell--tap {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.guest-invite-seg__cell--tap:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.guest-invite-seg__cell--tap:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.guest-invite-seg__cell--seen {
+  cursor: default;
+  pointer-events: none;
+}
+
+.guest-invite-seg--busy .guest-invite-seg__cell--tap {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.guest-invite-seg__glyph {
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.1em;
+  user-select: none;
+}
+
+.guest-invite-seg__glyph--not {
+  color: #ef4444;
+}
+
+.guest-invite-seg__glyph--sent {
+  color: #9ca3af;
+}
+
+.guest-invite-seg__glyph--seen {
+  color: #2563eb;
+}
+
+/* כניסה לפארטי — segmented 2 מצבים (RTL: ימין לא נכנס, שמאל נכנס) */
+.guest-entry-seg {
+  --thumb: 0;
+  width: 100%;
+  max-width: 5.35rem;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.guest-entry-seg--desk-col {
+  max-width: 5.35rem;
+}
+
+.guest-entry-seg__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  direction: rtl;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f3f4f6;
+  min-height: 2.4rem;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.guest-entry-seg--thumb-pending .guest-entry-seg__track {
+  border-color: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.guest-entry-seg--thumb-entered .guest-entry-seg__track {
+  border-color: rgba(22, 163, 74, 0.22);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.guest-entry-seg--mixed .guest-entry-seg__track {
+  border-color: rgba(0, 0, 0, 0.06);
+  background: #f9fafb;
+}
+
+.guest-entry-seg__thumb {
+  position: absolute;
+  z-index: 0;
+  inset-block: 3px;
+  width: calc(100% / 2 - 6px);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  pointer-events: none;
+  transition: inset-inline-start 0.2s ease;
+  inset-inline-start: calc(3px + var(--thumb) * (100% / 2));
+}
+
+.guest-entry-seg__cell {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0.18rem 0.06rem;
+  min-height: 2.4rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-entry-seg__cell--tap {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.guest-entry-seg__cell--tap:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.guest-entry-seg__cell--tap:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.guest-entry-seg--busy .guest-entry-seg__cell--tap {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.guest-entry-seg__glyph {
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1;
+  user-select: none;
+}
+
+.guest-entry-seg__glyph--not {
+  color: #ef4444;
+}
+
+.guest-entry-seg__glyph--yes {
+  color: #16a34a;
 }
 

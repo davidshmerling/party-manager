@@ -493,9 +493,38 @@ main.main:has(.guest-manage-page) {
 
 .guest-mob-primary-ico-wa {
   flex: 0 0 auto;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.12rem;
+}
+
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified--mob {
+  min-height: 30px;
+}
+
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified__btn {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  border-radius: 9px;
+}
+
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified__ico {
+  width: 15px;
+  height: 15px;
+}
+
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified__spin {
+  width: 15px;
+  height: 15px;
+}
+
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified--empty,
+.guest-manage-page .guest-mob-primary-ico-wa .guest-wa-unified--noop {
+  width: 30px;
+  min-height: 30px;
 }
 
 .guest-mob-primary-ico-wa .guest-send-wa-wrap {
@@ -543,6 +572,44 @@ main.main:has(.guest-manage-page) {
   display: none;
 }
 
+/* סטטוס הזמנה segmented — מובייל */
+.guest-manage-page .guest-invite-seg--mob {
+  flex: 0 0 auto;
+  min-width: 5.6rem;
+  max-width: 6.75rem;
+}
+
+.guest-manage-page .guest-invite-seg--mob .guest-invite-seg__track {
+  min-height: 30px;
+  border-radius: 10px;
+}
+
+.guest-manage-page .guest-invite-seg--mob .guest-invite-seg__cell {
+  min-height: 30px;
+  padding: 0.1rem 0.04rem;
+}
+
+.guest-manage-page .guest-invite-seg--mob .guest-invite-seg__glyph {
+  font-size: 0.56rem;
+  letter-spacing: -0.12em;
+}
+
+.guest-manage-page .guest-entry-seg--mob {
+  max-width: 5.1rem;
+}
+
+.guest-manage-page .guest-entry-seg--mob .guest-entry-seg__track {
+  min-height: 30px;
+}
+
+.guest-manage-page .guest-entry-seg--mob .guest-entry-seg__cell {
+  min-height: 30px;
+  padding: 0.1rem 0.04rem;
+}
+
+.guest-manage-page .guest-entry-seg--mob .guest-entry-seg__glyph {
+  font-size: 0.72rem;
+}
 
 .guest-add-cta {
   min-height: 44px;

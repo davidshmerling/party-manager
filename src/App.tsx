@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { AdminShell } from './components/AdminShell'
 import { HomeLayout } from './components/HomeLayout'
@@ -48,6 +49,7 @@ function LegacyEToEvents() {
 export default function App() {
   return (
     <BrowserRouter>
+      <>
       <Routes>
         <Route path="/ticket/partner/:partnerSlug" element={<PartnerPaymentLandingMockPage />} />
         <Route path="/ticket/:code" element={<GuestCardPage />} />
@@ -110,6 +112,8 @@ export default function App() {
 
         <Route path="*" element={<Navigate to={LANDING_PATH} replace />} />
       </Routes>
+      <SpeedInsights />
+      </>
     </BrowserRouter>
   )
 }

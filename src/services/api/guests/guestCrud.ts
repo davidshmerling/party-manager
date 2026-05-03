@@ -106,6 +106,8 @@ export async function updateGuest(
       | 'entered_at'
       | 'whatsapp_invite_sent_at'
       | 'invite_sent_method'
+      | 'whatsapp_invite_twilio_sid'
+      | 'whatsapp_invite_twilio_status'
       | 'card_opened_at'
     >
   >,
@@ -121,6 +123,16 @@ export async function updateGuest(
   if (body.invite_sent_method !== undefined) {
     patch.invite_sent_method = body.invite_sent_method?.trim()
       ? body.invite_sent_method.trim()
+      : null
+  }
+  if (body.whatsapp_invite_twilio_sid !== undefined) {
+    patch.whatsapp_invite_twilio_sid = body.whatsapp_invite_twilio_sid?.trim()
+      ? body.whatsapp_invite_twilio_sid.trim()
+      : null
+  }
+  if (body.whatsapp_invite_twilio_status !== undefined) {
+    patch.whatsapp_invite_twilio_status = body.whatsapp_invite_twilio_status?.trim()
+      ? body.whatsapp_invite_twilio_status.trim().toLowerCase()
       : null
   }
   if (body.card_opened_at !== undefined) {

@@ -1,6 +1,8 @@
 import { memo, useEffect, useState } from 'react'
 import { GuestTicketStepper } from './GuestTicketStepper'
 import { IncomeRecipientSelect } from './IncomeRecipientSelect'
+import { GuestEntryMarkButton } from './GuestEntryMarkButton'
+import { GuestInviteSentMarkButton } from './GuestInviteSentMarkButton'
 import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
 
@@ -34,7 +36,6 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     onDelete,
     onCopyWaMessage,
     onSendTwilio,
-    onOpenWaChat,
     twilioTemplateApproved = true,
     twilioSendingGuestId = null,
     onCardPress,
@@ -69,6 +70,8 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     setPhone,
     members,
     saveField,
+    saveInviteSent,
+    saveStatus,
   } = useGuestGroupRowModel(props)
 
   return (
@@ -180,7 +183,7 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
         <div
           className="guest-mob-compact__chips guest-mob-compact__chips--manage-strip"
           role="group"
-          aria-label="הזמנה ופעולות"
+          aria-label="כניסה, הזמנה ופעולות"
         >
           <button
             type="button"
@@ -197,6 +200,8 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
             </span>
             <MobPrimarySvgChat />
           </button>
+          <GuestEntryMarkButton variant="mob" members={members} saveStatus={saveStatus} />
+          <GuestInviteSentMarkButton variant="mob" members={members} saveInviteSent={saveInviteSent} />
           {onSendTwilio ? (
             <GuestWhatsAppUnifiedControl
               guestId={rep.id}
@@ -206,7 +211,6 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
               twilioTemplateApproved={twilioTemplateApproved}
               twilioSendingGuestId={twilioSendingGuestId}
               onSend={onSendTwilio}
-              onOpenChat={onOpenWaChat}
               variant="mob"
             />
           ) : null}

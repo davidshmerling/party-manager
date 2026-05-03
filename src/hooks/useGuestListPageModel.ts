@@ -95,7 +95,6 @@ export function useGuestListPageModel() {
   const [pasteErrorLog, setPasteErrorLog] = useState<string[] | null>(null)
   const [listNotice, setListNotice] = useState<string | null>(null)
   const [twilioSendingGuestId, setTwilioSendingGuestId] = useState<string | null>(null)
-  const [waChatGuestId, setWaChatGuestId] = useState<string | null>(null)
   /** מיון קבוצות: שם, זמן כניסה לפארטי, או created_at (הוספה לרשימה) */
   const [guestSortMode, setGuestSortMode] = useState<'name' | 'entry_time' | 'added_at'>('name')
   /** סינון לפי סטטוס שליחת הזמנה בוואטסאפ */
@@ -1289,13 +1288,6 @@ export function useGuestListPageModel() {
     }
   }
 
-  const openWaChat = useCallback((id: string) => {
-    setWaChatGuestId(id)
-  }, [])
-  const closeWaChat = useCallback(() => {
-    setWaChatGuestId(null)
-  }, [])
-
   async function onPasteBulk() {
     if (!currentEventId || !pasteText.trim() || pasteSubmitting) return
     setError(null)
@@ -1572,9 +1564,6 @@ export function useGuestListPageModel() {
     rowCopyWhatsAppMessage,
     rowCopyGuestPhoneE164,
     rowSendTwilio,
-    waChatGuestId,
-    openWaChat,
-    closeWaChat,
     onPasteBulk,
     handleGuestSearch,
     listDisabled,

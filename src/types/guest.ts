@@ -33,21 +33,6 @@ export interface Guest {
   updated_at: string
 }
 
-/** שורה מטבלת ‎whatsapp_messages‎ (קריאה בלבד מהלקוח) */
-export type WhatsAppMessageRow = {
-  id: string
-  event_id: string
-  guest_id: string
-  from_phone: string
-  to_phone: string
-  body: string
-  direction: 'inbound' | 'outbound'
-  status: string
-  twilio_sid: string | null
-  message_kind: 'invite' | 'session'
-  created_at: string
-}
-
 export type ScanResult =
   | 'ok'
   | 'already_entered'

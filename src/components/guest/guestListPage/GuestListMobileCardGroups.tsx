@@ -22,7 +22,6 @@ type Props = {
   onDelete: GuestGroupRowProps['onDelete']
   onCopyWaMessage: GuestGroupRowProps['onCopyWaMessage']
   onSendTwilio?: GuestGroupRowProps['onSendTwilio']
-  onOpenWaChat: GuestGroupRowProps['onOpenWaChat']
   twilioTemplateApproved?: GuestGroupRowProps['twilioTemplateApproved']
   twilioSendingGuestId?: GuestGroupRowProps['twilioSendingGuestId']
   onCardPress: GuestGroupRowProps['onCardPress']
@@ -46,7 +45,6 @@ export function GuestListMobileCardGroups({
   onDelete,
   onCopyWaMessage,
   onSendTwilio,
-  onOpenWaChat,
   twilioTemplateApproved,
   twilioSendingGuestId,
   onCardPress,
@@ -77,7 +75,6 @@ export function GuestListMobileCardGroups({
             onDelete={onDelete}
             onCopyWaMessage={onCopyWaMessage}
             onSendTwilio={onSendTwilio}
-            onOpenWaChat={onOpenWaChat}
             twilioTemplateApproved={twilioTemplateApproved}
             twilioSendingGuestId={twilioSendingGuestId}
             onCardPress={onCardPress}
@@ -116,7 +113,6 @@ export function GuestListMobileCardGroups({
             onDelete={onDelete}
             onCopyWaMessage={onCopyWaMessage}
             onSendTwilio={onSendTwilio}
-            onOpenWaChat={onOpenWaChat}
             twilioTemplateApproved={twilioTemplateApproved}
             twilioSendingGuestId={twilioSendingGuestId}
             onCardPress={onCardPress}

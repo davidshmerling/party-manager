@@ -18,8 +18,6 @@ export type GuestGroupRowProps = {
   onCopyWaMessage: (id: string) => void
   /** שליחת הזמנה בווטסאפ דרך Twilio (Edge Function + Secrets) */
   onSendTwilio?: (guestId: string) => Promise<void>
-  /** פתיחת שיחת WhatsApp (מגירה / מודל) */
-  onOpenWaChat: (guestId: string) => void
   /** כש-false — תבנית WhatsApp טרם אושרה ב-Meta; כפתור Twilio חסום */
   twilioTemplateApproved?: boolean
   /** כשליחה ל-Twilio פעילה לאותו אורח מייצג */
@@ -129,6 +127,8 @@ export function useGuestGroupRowModel({
         ...m,
         whatsapp_invite_sent_at: ts,
         invite_sent_method: ts ? 'manual_admin' : null,
+        whatsapp_invite_twilio_sid: null,
+        whatsapp_invite_twilio_status: null,
         updated_at: now,
       }))
       await onChange(optimistic)
@@ -138,6 +138,8 @@ export function useGuestGroupRowModel({
             updateGuest(m.id, {
               whatsapp_invite_sent_at: ts,
               invite_sent_method: ts ? 'manual_admin' : null,
+              whatsapp_invite_twilio_sid: null,
+              whatsapp_invite_twilio_status: null,
             }),
           ),
         )

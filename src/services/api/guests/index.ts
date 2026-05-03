@@ -16,11 +16,7 @@ export { createGuest, updateGuest, deleteGuest, deleteGuestsByIds } from './gues
 
 export { markWhatsAppInvitesSent, sendWhatsApp, sendGuestWhatsAppViaTwilio } from './guestWhatsApp'
 
-export {
-  fetchWhatsAppMessagesForGuests,
-  fetchTwilioBalanceForEvent,
-  sendWhatsAppChatMessage,
-} from './whatsappSession'
+export { fetchTwilioBalanceForEvent } from './whatsappSession'
 export type { TwilioBalanceResult } from './whatsappSession'
 
 export {

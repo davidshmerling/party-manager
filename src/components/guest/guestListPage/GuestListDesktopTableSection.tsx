@@ -21,7 +21,6 @@ type Props = {
   onDelete: GuestGroupRowProps['onDelete']
   onCopyWaMessage: GuestGroupRowProps['onCopyWaMessage']
   onSendTwilio?: GuestGroupRowProps['onSendTwilio']
-  onOpenWaChat: GuestGroupRowProps['onOpenWaChat']
   twilioTemplateApproved?: GuestGroupRowProps['twilioTemplateApproved']
   twilioSendingGuestId?: GuestGroupRowProps['twilioSendingGuestId']
   onCardPress: GuestGroupRowProps['onCardPress']
@@ -34,7 +33,7 @@ type Props = {
   saveIncomeRecipientForMembers: (members: Guest[], recipientValue: string) => void | Promise<void>
 }
 
-const TABLE_COLS = 6
+const TABLE_COLS = 8
 
 export function GuestListDesktopTableSection({
   listGroups,
@@ -45,7 +44,6 @@ export function GuestListDesktopTableSection({
   onDelete,
   onCopyWaMessage,
   onSendTwilio,
-  onOpenWaChat,
   twilioTemplateApproved,
   twilioSendingGuestId,
   onCardPress,
@@ -67,6 +65,8 @@ export function GuestListDesktopTableSection({
             <col className="guest-desk-col guest-desk-col--price" />
             <col className="guest-desk-col guest-desk-col--recipient" />
             <col className="guest-desk-col guest-desk-col--tickets" />
+            <col className="guest-desk-col guest-desk-col--entry-mark" />
+            <col className="guest-desk-col guest-desk-col--invite-mark" />
             <col className="guest-desk-col guest-desk-col--actions" />
           </colgroup>
           <thead>
@@ -85,6 +85,20 @@ export function GuestListDesktopTableSection({
               </th>
               <th scope="col" className="guest-desk-th guest-desk-th--tickets">
                 כמות כרטיסים
+              </th>
+              <th
+                scope="col"
+                className="guest-desk-th guest-desk-th--entry-mark guest-desk-th--tag"
+                title="סימון ידני: האם האורח נכנס לפארטי"
+              >
+                כניסה
+              </th>
+              <th
+                scope="col"
+                className="guest-desk-th guest-desk-th--invite-mark guest-desk-th--tag"
+                title="סימון ידני: האם הזמנת WhatsApp נשלחה (מסתנכרן מהמסד)"
+              >
+                הזמנה
               </th>
               <th scope="col" className="guest-desk-th guest-desk-th--actions">
                 פעולות
@@ -109,7 +123,6 @@ export function GuestListDesktopTableSection({
                   onDelete={onDelete}
                   onCopyWaMessage={onCopyWaMessage}
                   onSendTwilio={onSendTwilio}
-                  onOpenWaChat={onOpenWaChat}
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}
@@ -157,7 +170,6 @@ export function GuestListDesktopTableSection({
                   onDelete={onDelete}
                   onCopyWaMessage={onCopyWaMessage}
                   onSendTwilio={onSendTwilio}
-                  onOpenWaChat={onOpenWaChat}
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}

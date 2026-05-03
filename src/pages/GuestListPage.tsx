@@ -8,7 +8,6 @@ import { GuestListPageBanners } from '../components/guest/guestListPage/GuestLis
 import { GuestListPageHeader } from '../components/guest/guestListPage/GuestListPageHeader'
 import { GuestListPasteBulk } from '../components/guest/guestListPage/GuestListPasteBulk'
 import { GuestListSearchFilters } from '../components/guest/guestListPage/GuestListSearchFilters'
-import { GuestWhatsAppChatSheet } from '../components/guest/GuestWhatsAppChatSheet'
 import { useGuestListPageModel } from '../hooks/useGuestListPageModel'
 
 export function GuestListPage() {
@@ -110,7 +109,6 @@ export function GuestListPage() {
                   onDelete={m.rowDeleteGroup}
                   onCopyWaMessage={m.rowCopyWhatsAppMessage}
                   onSendTwilio={m.rowSendTwilio}
-                  onOpenWaChat={m.openWaChat}
                   twilioTemplateApproved={m.twilioTemplateApproved}
                   twilioSendingGuestId={m.twilioSendingGuestId}
                   onCardPress={m.onGuestCardFocus}
@@ -133,7 +131,6 @@ export function GuestListPage() {
                     onDelete={m.rowDeleteGroup}
                     onCopyWaMessage={m.rowCopyWhatsAppMessage}
                     onSendTwilio={m.rowSendTwilio}
-                    onOpenWaChat={m.openWaChat}
                     twilioTemplateApproved={m.twilioTemplateApproved}
                     twilioSendingGuestId={m.twilioSendingGuestId}
                     onCardPress={m.onGuestCardFocus}
@@ -164,15 +161,6 @@ export function GuestListPage() {
       </div>
 
       <MobileToast toast={m.mobileToast} onDismiss={() => m.setMobileToast(null)} />
-
-      {m.currentEventId ? (
-        <GuestWhatsAppChatSheet
-          eventId={m.currentEventId}
-          guestId={m.waChatGuestId}
-          open={m.waChatGuestId != null}
-          onClose={m.closeWaChat}
-        />
-      ) : null}
     </div>
   )
 }

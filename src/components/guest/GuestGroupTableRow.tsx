@@ -1,6 +1,8 @@
 import { memo, useEffect, useState } from 'react'
 import { GuestTicketStepper } from './GuestTicketStepper'
 import { IncomeRecipientSelect } from './IncomeRecipientSelect'
+import { GuestEntryMarkButton } from './GuestEntryMarkButton'
+import { GuestInviteSentMarkButton } from './GuestInviteSentMarkButton'
 import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
 
@@ -51,7 +53,6 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     onDelete,
     onCopyWaMessage,
     onSendTwilio,
-    onOpenWaChat,
     twilioTemplateApproved = true,
     twilioSendingGuestId = null,
     onCardPress,
@@ -75,6 +76,8 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     setPhone,
     members,
     saveField,
+    saveInviteSent,
+    saveStatus,
   } = useGuestGroupRowModel(props)
 
   const [priceInput, setPriceInput] = useState('')
@@ -214,6 +217,18 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
           )}
         </td>
         <td
+          className="guest-desk-td guest-desk-td--entry-mark guest-desk-td--center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GuestEntryMarkButton variant="desk-col" members={members} saveStatus={saveStatus} />
+        </td>
+        <td
+          className="guest-desk-td guest-desk-td--invite-mark guest-desk-td--center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GuestInviteSentMarkButton variant="desk-col" members={members} saveInviteSent={saveInviteSent} />
+        </td>
+        <td
           className="guest-desk-td guest-desk-td--actions"
           onClick={(e) => e.stopPropagation()}
         >
@@ -239,7 +254,6 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
                 twilioTemplateApproved={twilioTemplateApproved}
                 twilioSendingGuestId={twilioSendingGuestId}
                 onSend={onSendTwilio}
-                onOpenChat={onOpenWaChat}
                 variant="desk"
               />
             ) : null}

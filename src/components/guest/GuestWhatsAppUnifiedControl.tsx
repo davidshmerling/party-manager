@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 import type { Guest, GuestSource } from '../../types/guest'
 import { formatIsraelMobileE164 } from '../../utils/whatsapp'
-import { GuestWhatsAppInviteGlyph, resolveInviteTwilioGlyph } from './GuestWhatsAppInviteGlyph'
 
 function IcoWhatsApp({ className }: { className?: string }) {
   return (
@@ -14,6 +13,9 @@ function IcoWhatsApp({ className }: { className?: string }) {
   )
 }
 
+const RESEND_CONFIRM_MSG =
+  'לשלוח שוב את הזמנת ה-WhatsApp דרך Twilio? (ייתכן חיוב נוסף אצל ספק ההודעות)'
+
 export type GuestWhatsAppUnifiedControlProps = {
   guestId: string
   phone: string
@@ -22,7 +24,6 @@ export type GuestWhatsAppUnifiedControlProps = {
   twilioTemplateApproved?: boolean
   twilioSendingGuestId?: string | null
   onSend: (id: string) => Promise<void>
-  onOpenChat: (id: string) => void
   variant: 'mob' | 'desk'
 }
 
@@ -34,7 +35,6 @@ function GuestWhatsAppUnifiedControlInner({
   twilioTemplateApproved = true,
   twilioSendingGuestId = null,
   onSend,
-  onOpenChat,
   variant,
 }: GuestWhatsAppUnifiedControlProps) {
   const [localErr, setLocalErr] = useState(false)
@@ -43,54 +43,55 @@ function GuestWhatsAppUnifiedControlInner({
   const phoneValid = trimmed.length > 0 && formatIsraelMobileE164(phone) !== null
 
   const inviteAllSent = members.every((m) => m.whatsapp_invite_sent_at != null)
-  const inviteTwilioAll =
-    inviteAllSent &&
-    members.every((m) => String(m.invite_sent_method ?? '').trim().toLowerCase() === 'twilio')
 
-  const canOpenChat = inviteTwilioAll
-  const canSend =
-    !payAtDoor &&
-    phoneValid &&
-    twilioTemplateApproved &&
-    !inviteAllSent
+  const canSendFirst =
+    !payAtDoor && phoneValid && twilioTemplateApproved && !inviteAllSent
+
+  const canResend =
+    !payAtDoor && phoneValid && twilioTemplateApproved && inviteAllSent
 
   const sending = twilioSendingGuestId === guestId && !localErr
-  const { title: glyphTitle } = resolveInviteTwilioGlyph(members)
 
   useEffect(() => {
-    if (inviteTwilioAll) setLocalErr(false)
-  }, [inviteTwilioAll])
+    if (inviteAllSent) setLocalErr(false)
+  }, [inviteAllSent])
 
-  let title = 'שלח הזמנת WhatsApp'
+  let title = 'שלח הזמנת WhatsApp דרך Twilio'
   if (payAtDoor) title = 'תשלום בכניסה — אין שליחה'
-  else if (!twilioTemplateApproved) title = 'תבנית טרם אושרה ב-Meta'
   else if (!phoneValid) title = 'אין מספר טלפון'
-  else if (canOpenChat) title = 'פתח שיחת WhatsApp'
   else if (localErr) {
     title = 'השליחה נכשלה — אפשר לנסות שוב, או להשתמש בכפתור 💬 «העתק הודעה» ליד'
-  } else if (inviteAllSent && !inviteTwilioAll) title = 'הוזמן שלא דרך Twilio — אין שיחה מהמערכת'
+  } else if (canResend) {
+    title = 'שלח שוב דרך Twilio (יוצג אישור)'
+  } else if (!twilioTemplateApproved && !inviteAllSent) {
+    title = 'תבנית טרם אושרה ב-Meta'
+  }
 
   const handleClick = useCallback(async () => {
-    if (canOpenChat) {
-      onOpenChat(guestId)
+    if (canSendFirst) {
+      if (sending) return
+      setLocalErr(false)
+      try {
+        await onSend(guestId)
+      } catch {
+        setLocalErr(true)
+      }
       return
     }
-    if (!canSend || sending) return
-    setLocalErr(false)
-    try {
-      await onSend(guestId)
-    } catch {
-      setLocalErr(true)
+    if (canResend) {
+      if (sending) return
+      if (!window.confirm(RESEND_CONFIRM_MSG)) return
+      setLocalErr(false)
+      try {
+        await onSend(guestId)
+      } catch {
+        setLocalErr(true)
+      }
     }
-  }, [canOpenChat, canSend, guestId, onOpenChat, onSend, sending])
+  }, [canResend, canSendFirst, guestId, onSend, sending])
 
   const disabled =
-    payAtDoor ||
-    !phoneValid ||
-    (!canOpenChat && !canSend) ||
-    (!twilioTemplateApproved && !canOpenChat) ||
-    sending ||
-    (inviteAllSent && !inviteTwilioAll && !canOpenChat)
+    payAtDoor || !phoneValid || (!canSendFirst && !canResend) || sending
 
   const wrapClass =
     variant === 'mob'
@@ -99,14 +100,23 @@ function GuestWhatsAppUnifiedControlInner({
 
   const btnClass =
     variant === 'mob'
-      ? `guest-wa-unified__btn${disabled ? ' is-disabled' : ''}${canOpenChat ? ' guest-wa-unified__btn--chat' : ''}${localErr ? ' guest-wa-unified__btn--err' : ''}`
-      : `guest-wa-unified__btn guest-wa-unified__btn--desk${disabled ? ' is-disabled' : ''}${canOpenChat ? ' guest-wa-unified__btn--chat' : ''}${localErr ? ' guest-wa-unified__btn--err' : ''}`
+      ? `guest-wa-unified__btn${disabled ? ' is-disabled' : ''}${localErr ? ' guest-wa-unified__btn--err' : ''}`
+      : `guest-wa-unified__btn guest-wa-unified__btn--desk${disabled ? ' is-disabled' : ''}${localErr ? ' guest-wa-unified__btn--err' : ''}`
+
+  if (payAtDoor) {
+    return (
+      <div
+        className={`${wrapClass} guest-wa-unified--noop`}
+        title="תשלום בכניסה — אין שליחת הזמנה"
+        aria-hidden
+      />
+    )
+  }
 
   return (
-    <div className={wrapClass} title={`${glyphTitle} — ${title}`}>
+    <div className={wrapClass} title={title} dir="rtl">
       <button
         type="button"
-        dir="rtl"
         className={btnClass}
         disabled={disabled}
         aria-label={title}
@@ -116,9 +126,6 @@ function GuestWhatsAppUnifiedControlInner({
           void handleClick()
         }}
       >
-        <span className="guest-wa-unified__glyph" aria-hidden>
-          <GuestWhatsAppInviteGlyph members={members} />
-        </span>
         {sending ? (
           <span className="guest-wa-unified__spin" aria-hidden />
         ) : (
