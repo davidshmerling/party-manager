@@ -104,6 +104,12 @@ export async function sendGuestWhatsAppViaTwilio(
   if (!d?.ok || typeof d.sent_at !== 'string' || !Array.isArray(d.marked_guest_ids)) {
     throw new Error(msg !== fallbackMsg ? msg : 'תגובה לא צפויה מהשרת')
   }
-  return d as SendGuestTwilioSuccess
+  return {
+    ok: true,
+    twilio_sid: typeof d.twilio_sid === 'string' ? d.twilio_sid : '',
+    twilio_status: typeof d.twilio_status === 'string' ? d.twilio_status : undefined,
+    sent_at: d.sent_at,
+    marked_guest_ids: d.marked_guest_ids,
+  }
 }
 

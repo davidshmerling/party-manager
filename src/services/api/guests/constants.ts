@@ -1,6 +1,6 @@
 /** עמודות ל־mapGuestRow — ללא `*` ברשימות (פחות רוחב פס / RAM) */
 export const GUEST_ROW_COLUMNS =
-  'id, event_id, name, phone, source, unique_code, invite_bundle_code, status, entered_at, card_opened_at, whatsapp_invite_sent_at, invite_sent_method, created_at, updated_at'
+  'id, event_id, name, phone, source, unique_code, invite_bundle_code, status, entered_at, card_opened_at, whatsapp_invite_sent_at, invite_sent_method, whatsapp_last_inbound_at, whatsapp_invite_twilio_sid, whatsapp_invite_twilio_status, created_at, updated_at'
 
 /** גודל עמוד לטעינת אורחים — מפחית תשובת HTTP אחת ענקית (timeout / זיכרון) */
 export const GUESTS_FETCH_CHUNK = 1500

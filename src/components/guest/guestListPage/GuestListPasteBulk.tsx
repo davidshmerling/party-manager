@@ -23,6 +23,10 @@ export function GuestListPasteBulk({
         <strong>שם מלא</strong>, <strong>מספר טלפון</strong>, <strong>למי מיוחסת ההכנסה</strong> (שם קצר של
         שותף או המילה פייבוקס / סלקטור), <strong>סכום</strong>.
       </p>
+      <p className="paste-bulk-hint" dir="rtl">
+        הייבוא רץ בשרת. לזהויות חדשות עם טלפון תקין ותבנית WhatsApp מאושרת, נוצר תור שליחה ב־Supabase עם פיזור
+        בין דקה ל־10 דקות; Worker (Cron דקתי) מבצע את השליחה דרך Twilio.
+      </p>
       <figure className="paste-bulk-sample-wrap">
         <figcaption className="paste-bulk-sample-cap">דוגמאות</figcaption>
         <pre className="paste-bulk-sample" dir="rtl">

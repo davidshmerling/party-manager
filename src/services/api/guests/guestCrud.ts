@@ -20,6 +20,8 @@ export type CreateGuestResult = {
   guest: Guest
   /** נוצרה שורת הכנסה — לעדכון מקומי בלי `fetch` מלא */
   financeLine: EventFinanceLine | null
+  /** כרטיס ראשון לשם+טלפון באירוע (לא הוספת כרטיס לאותה זהות) */
+  wasFirstIdentityTicket: boolean
 }
 
 async function lookupInviteBundleForNewCard(
@@ -47,6 +49,7 @@ export async function createGuest(
   const p = phone.trim()
   const client = sb()
   const siblingBundle = await lookupInviteBundleForNewCard(eventId, n, p)
+  const wasFirstIdentityTicket = siblingBundle == null
   for (let i = 0; i < 5; i++) {
     const code = generateUniqueCode()
     const bundle = siblingBundle ?? code
@@ -79,13 +82,13 @@ export async function createGuest(
             incomeRecipientKind: options?.incomeRecipientKind ?? 'partner',
             isPaid: options?.isPaid ?? false,
           })
-          return { guest, financeLine: line }
+          return { guest, financeLine: line, wasFirstIdentityTicket }
         } catch (e) {
           await client.from('guests').delete().eq('id', guest.id)
           throw e instanceof Error ? e : new Error('שמירת הכספים נכשלה — האורח לא נשמר')
         }
       }
-      return { guest, financeLine: null }
+      return { guest, financeLine: null, wasFirstIdentityTicket }
     }
     if (error?.code !== '23505') throw new Error(errMsg(error))
   }

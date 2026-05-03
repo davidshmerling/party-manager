@@ -17,9 +17,16 @@ export { createGuest, updateGuest, deleteGuest, deleteGuestsByIds } from './gues
 export { markWhatsAppInvitesSent, sendWhatsApp, sendGuestWhatsAppViaTwilio } from './guestWhatsApp'
 
 export {
+  fetchWhatsAppMessagesForGuests,
+  fetchTwilioBalanceForEvent,
+  sendWhatsAppChatMessage,
+} from './whatsappSession'
+export type { TwilioBalanceResult } from './whatsappSession'
+
+export {
   resolvePartnerNameTokenToRecipientId,
   resolveManualIncomeRecipientId,
   resolveIncomeRecipientWithKind,
 } from './incomeRecipients'
 
-export { postGuestsBulk } from './bulkPaste'
+export { bulkImportGuests } from './bulkImportGuests'

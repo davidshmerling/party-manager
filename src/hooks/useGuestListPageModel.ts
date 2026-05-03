@@ -7,19 +7,20 @@ import type { AdminUserRow } from '../types/admin'
 import type { EventStaffRow } from '../types/event'
 import type { EventFinanceLine, IncomeRecipientKind } from '../types/finance'
 import type { Guest } from '../types/guest'
+import type { PartyEventShell } from '../services/api/partyShell'
 import { useAuth } from '../auth/AuthProvider'
 import { useEvent } from '../context/EventContext'
 import {
   createGuest,
   deleteGuestsByIds,
+  bulkImportGuests,
   fetchPartyEventShell,
-  postGuestsBulk,
+  fetchTwilioBalanceForEvent,
   sendGuestWhatsAppViaTwilio,
   sendWhatsApp,
   syncWhatsAppInviteTemplateStatus,
   updateEventFinanceLine,
 } from '../services/api'
-import type { PartyEventShell } from '../services/api/partyShell'
 import { logUserActivity } from '../services/loggingApi'
 import {
   hydratePartyShellCache,
@@ -94,6 +95,7 @@ export function useGuestListPageModel() {
   const [pasteErrorLog, setPasteErrorLog] = useState<string[] | null>(null)
   const [listNotice, setListNotice] = useState<string | null>(null)
   const [twilioSendingGuestId, setTwilioSendingGuestId] = useState<string | null>(null)
+  const [waChatGuestId, setWaChatGuestId] = useState<string | null>(null)
   /** מיון קבוצות: שם, זמן כניסה לפארטי, או created_at (הוספה לרשימה) */
   const [guestSortMode, setGuestSortMode] = useState<'name' | 'entry_time' | 'added_at'>('name')
   /** סינון לפי סטטוס שליחת הזמנה בוואטסאפ */
@@ -794,12 +796,17 @@ export function useGuestListPageModel() {
       const raw = newGuestPrice.trim().replace(',', '.')
       const parsed = raw === '' ? 0 : Number(raw)
       const amount = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
-      const { guest, financeLine } = await createGuest(newName.trim(), newPhone.trim(), currentEventId, {
-        incomeRecipientAdminId: incomeAdminId,
-        incomeRecipientKind: incomeKind,
-        isPaid: false,
-        amount,
-      })
+      const { guest, financeLine, wasFirstIdentityTicket } = await createGuest(
+        newName.trim(),
+        newPhone.trim(),
+        currentEventId,
+        {
+          incomeRecipientAdminId: incomeAdminId,
+          incomeRecipientKind: incomeKind,
+          isPaid: false,
+          amount,
+        },
+      )
       updateCachedPartyShellGuests(queryClient, currentEventId, (prev) =>
         sortGuestsLikeFetch([...prev, guest]),
       )
@@ -828,6 +835,75 @@ export function useGuestListPageModel() {
           finance_line_id: financeLine?.id ?? null,
         },
       })
+
+      /** שליחה אוטומטית רק אם: זהות ראשונה, תבנית מאושרת, מספר תקין, יתרת Twilio ≥ 2 (כשהבדיקה מצליחה) */
+      let twilioBalanceAllowsSend = true
+      try {
+        const bal = await fetchTwilioBalanceForEvent(currentEventId)
+        twilioBalanceAllowsSend = bal.balance >= 2
+      } catch {
+        /* אם לא הצלחנו לקרוא יתרה — ממשיכים לנסות; send-whatsapp יחסום ב-402 אם אין מספיק */
+        twilioBalanceAllowsSend = true
+      }
+
+      if (
+        wasFirstIdentityTicket &&
+        currentEvent &&
+        isTwilioWhatsappInviteTemplateApproved(currentEvent) &&
+        formatIsraelMobileE164(guest.phone) &&
+        twilioBalanceAllowsSend
+      ) {
+        setTwilioSendingGuestId(guest.id)
+        try {
+          const out = await sendGuestWhatsAppViaTwilio(currentEventId, guest.id)
+          const shell = queryClient.getQueryData<PartyEventShell>(
+            partyQueryKeys.partyShell(currentEventId),
+          )
+          const gList = shell?.guests ?? []
+          await persistGuestRows(
+            gList
+              .filter((row) => out.marked_guest_ids.includes(row.id))
+              .map((row) => ({
+                ...row,
+                whatsapp_invite_sent_at: out.sent_at,
+                invite_sent_method: 'twilio',
+                updated_at: out.sent_at,
+                whatsapp_invite_twilio_sid: out.twilio_sid?.trim() ? out.twilio_sid.trim() : null,
+                whatsapp_invite_twilio_status: (out.twilio_status ?? 'sent').toLowerCase(),
+              })),
+          )
+          hapticSuccess()
+          showMobileToast('ok', 'נשלחה הזמנה WhatsApp אוטומטית', { durationMs: 2400 })
+          logUserActivity({
+            kind: 'whatsapp',
+            action: 'twilio_auto_after_create',
+            eventId: currentEventId,
+            detail: { guest_id: guest.id },
+          })
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'שליחה אוטומטית נכשלה'
+          hapticError()
+          showMobileToast('err', msg, { durationMs: 3600 })
+          logUserActivity({
+            kind: 'whatsapp',
+            action: 'twilio_auto_after_create_error',
+            eventId: currentEventId,
+            detail: { guest_id: guest.id, error: msg },
+          })
+        } finally {
+          setTwilioSendingGuestId(null)
+        }
+      } else if (
+        wasFirstIdentityTicket &&
+        currentEvent &&
+        isTwilioWhatsappInviteTemplateApproved(currentEvent) &&
+        formatIsraelMobileE164(guest.phone) &&
+        !twilioBalanceAllowsSend
+      ) {
+        showMobileToast('info', 'לא נשלחה הזמנה אוטומטית — יתרת Twilio מתחת לסף ($2). השתמשו בכפתור הווטסאפ או בהעתקה.', {
+          durationMs: 4200,
+        })
+      }
     } catch (e) {
       const em = e instanceof Error ? e.message : 'שגיאה'
       setError(em)
@@ -1181,6 +1257,8 @@ export function useGuestListPageModel() {
             whatsapp_invite_sent_at: out.sent_at,
             invite_sent_method: 'twilio',
             updated_at: out.sent_at,
+            whatsapp_invite_twilio_sid: out.twilio_sid?.trim() ? out.twilio_sid.trim() : null,
+            whatsapp_invite_twilio_status: (out.twilio_status ?? 'sent').toLowerCase(),
           })),
       )
       hapticSuccess()
@@ -1211,6 +1289,13 @@ export function useGuestListPageModel() {
     }
   }
 
+  const openWaChat = useCallback((id: string) => {
+    setWaChatGuestId(id)
+  }, [])
+  const closeWaChat = useCallback(() => {
+    setWaChatGuestId(null)
+  }, [])
+
   async function onPasteBulk() {
     if (!currentEventId || !pasteText.trim() || pasteSubmitting) return
     setError(null)
@@ -1218,8 +1303,8 @@ export function useGuestListPageModel() {
     setPasteErrorLog(null)
     setPasteSubmitting(true)
     try {
-      const result = await postGuestsBulk({ text: pasteText, eventId: currentEventId })
-      if (result.ok === false) {
+      const result = await bulkImportGuests({ text: pasteText, eventId: currentEventId })
+      if (!result.ok && result.added === 0 && result.errors.length > 0) {
         setPasteErrorLog(result.errors)
         logUserActivity({
           kind: 'guest',
@@ -1240,14 +1325,31 @@ export function useGuestListPageModel() {
           result.added === 1 ? 'נוסף כרטיס אחד' : `נוספו ${result.added} כרטיסים`,
         )
       }
+      if (result.skipped > 0) {
+        parts.push(
+          result.skipped === 1 ? 'שורה כפולה דולגה' : `דולגו ${result.skipped} שורות כפולות`,
+        )
+      }
+      if (result.queuedForWhatsapp > 0) {
+        parts.push(
+          result.queuedForWhatsapp === 1
+            ? 'הוזמנה שליחת WhatsApp אחת לתור (עד ~10 דק׳)'
+            : `${result.queuedForWhatsapp} הזמנות בוצעו לתור WhatsApp (פיזור עד ~10 דק׳)`,
+        )
+      }
       if (parts.length === 0) {
         parts.push('לא נוספו שורות — רק שורות ריקות או אין תוכן')
       }
       setPasteMsg(parts.join(' · '))
-      if (result.added > 0 && result.created.length > 0) {
+      if (result.errors.length > 0) {
+        setPasteErrorLog(result.errors)
+      } else {
+        setPasteErrorLog(null)
+      }
+      if (result.added > 0 && result.createdGuests.length > 0) {
         updateCachedPartyShellGuests(queryClient, currentEventId, (prev) => {
           const existing = new Set(prev.map((g) => g.id))
-          const toAdd = result.created.filter((g) => !existing.has(g.id))
+          const toAdd = result.createdGuests.filter((g) => !existing.has(g.id))
           return sortGuestsLikeFetch([...prev, ...toAdd])
         })
         if (result.financeLinesCreated.length > 0) {
@@ -1265,9 +1367,12 @@ export function useGuestListPageModel() {
         eventId: currentEventId,
         detail: {
           added: result.added,
-          created_guest_ids: result.created.map((g) => g.id),
+          skipped: result.skipped,
+          queued_for_whatsapp: result.queuedForWhatsapp,
+          created_guest_ids: result.createdGuests.map((g) => g.id),
           finance_line_ids: result.financeLinesCreated.map((l) => l.id),
           message: parts.join(' · '),
+          errors: result.errors,
         },
       })
     } catch (e) {
@@ -1467,6 +1572,9 @@ export function useGuestListPageModel() {
     rowCopyWhatsAppMessage,
     rowCopyGuestPhoneE164,
     rowSendTwilio,
+    waChatGuestId,
+    openWaChat,
+    closeWaChat,
     onPasteBulk,
     handleGuestSearch,
     listDisabled,

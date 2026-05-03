@@ -4,6 +4,7 @@ import { useEvent } from '../context/EventContext'
 import {
   fetchEventRow,
   fetchPreviewGuestGroupForEvent,
+  fetchTwilioBalanceForEvent,
   guestCardUrl,
   submitWhatsAppInviteTemplateApproval,
   syncWhatsAppInviteTemplateStatus,
@@ -43,6 +44,8 @@ export function EventWhatsAppInvitePage() {
   const [approvalCategory, setApprovalCategory] = useState<'UTILITY' | 'MARKETING'>('UTILITY')
   const [approvalOkMsg, setApprovalOkMsg] = useState<string | null>(null)
   const [previewGuests, setPreviewGuests] = useState<Guest[]>([])
+  const [twilioBalance, setTwilioBalance] = useState<{ balance: number; currency: string } | null>(null)
+  const [twilioBalanceErr, setTwilioBalanceErr] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     if (!eventId) return
@@ -78,6 +81,14 @@ export function EventWhatsAppInvitePage() {
       })
       const guests = await fetchPreviewGuestGroupForEvent(eventId)
       setPreviewGuests(guests)
+      try {
+        const b = await fetchTwilioBalanceForEvent(eventId)
+        setTwilioBalance({ balance: b.balance, currency: b.currency })
+        setTwilioBalanceErr(null)
+      } catch {
+        setTwilioBalance(null)
+        setTwilioBalanceErr('לא ניתן לטעון יתרת Twilio')
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'שגיאה בטעינה')
     } finally {
@@ -98,6 +109,10 @@ export function EventWhatsAppInvitePage() {
   const eventLabel = currentEvent?.name?.trim() || 'האירוע'
   const waInviteUrls = useMemo(() => [guestCardUrl(demoBundleCode)], [demoBundleCode])
   const waPreviewBody = renderWhatsAppInvite(waTemplate, DEMO_NAME, waInviteUrls, eventLabel)
+
+  const balanceLowYellow =
+    twilioBalance != null && twilioBalance.balance < 5 && twilioBalance.balance >= 2
+  const balanceLowRed = twilioBalance != null && twilioBalance.balance < 2
 
   async function onSave() {
     if (!eventId) return
@@ -161,6 +176,27 @@ export function EventWhatsAppInvitePage() {
           {syncNote}
         </div>
       )}
+      {twilioBalanceErr && (
+        <div className="banner error" role="status">
+          {twilioBalanceErr}
+        </div>
+      )}
+      {twilioBalance != null && !twilioBalanceErr ? (
+        <div
+          className={`banner ${balanceLowRed ? 'error' : balanceLowYellow ? 'warn' : 'info'}`}
+          role="status"
+        >
+          יתרת Twilio:{' '}
+          <strong dir="ltr">
+            {twilioBalance.currency} {twilioBalance.balance.toFixed(2)}
+          </strong>
+          {balanceLowRed
+            ? ' — מתחת ל־2: שליחת הודעות חסומה עד טעינת חשבון.'
+            : balanceLowYellow
+              ? ' — מתחת ל־5: מומלץ לטעון בקרוב.'
+              : null}
+        </div>
+      ) : null}
 
       {loading ? (
         <p className="muted">טוען…</p>

@@ -1,26 +1,8 @@
 import { memo, useEffect, useState } from 'react'
-import { GuestListStatusBadge, guestStatusText } from './GuestListStatusBadge'
-import { GuestBinaryStatusToggle } from './GuestBinaryStatusToggle'
-import { statusTag, inviteMixedLabel } from './guestStatusTags'
 import { GuestTicketStepper } from './GuestTicketStepper'
 import { IncomeRecipientSelect } from './IncomeRecipientSelect'
-import { GuestSendWhatsAppButton } from './GuestSendWhatsAppButton'
+import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
-
-function DeskIcoPhone() {
-  return (
-    <svg
-      className="guest-desk-act__ico"
-      width={18}
-      height={18}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M6.62 10.79a15.15 15.15 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.36 11.36 0 003.57.57 1 1 0 011 1V21a1 1 0 01-1 1C10.07 22 2 13.93 2 3a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.24 1.02l-2.21 2.2z" />
-    </svg>
-  )
-}
 
 function DeskIcoChat() {
   return (
@@ -68,8 +50,8 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     isFocused,
     onDelete,
     onCopyWaMessage,
-    onCopyPhoneE164,
     onSendTwilio,
+    onOpenWaChat,
     twilioTemplateApproved = true,
     twilioSendingGuestId = null,
     onCardPress,
@@ -91,22 +73,8 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     setName,
     phone,
     setPhone,
-    multi,
-    allEntered,
-    entryMixed,
-    enteredCount,
-    displayStatus,
-    inviteAllSent,
-    inviteMixed,
-    cardOpenAll,
-    cardOpenMixed,
-    cardOpenedCount,
-    inviteSentCount,
-    saveField,
-    saveStatus,
-    saveCardOpened,
-    saveInviteSent,
     members,
+    saveField,
   } = useGuestGroupRowModel(props)
 
   const [priceInput, setPriceInput] = useState('')
@@ -117,10 +85,6 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
       setPriceInput('')
     }
   }, [incomeAmount, groupKey])
-
-  const entryMixedGroup = entryMixed && multi
-  const entryPendingOn = !entryMixedGroup && displayStatus === 'pending'
-  const entryEnteredOn = !entryMixedGroup && displayStatus === 'entered'
 
   const rowClass = `guest-desk-tr${tableStripeIndex % 2 === 0 ? ' guest-desk-tr--stripe' : ''}${searchHighlight ? ' guest-desk-tr--search' : ''}${isFocused ? ' guest-desk-tr--focused' : ''}`
 
@@ -250,107 +214,33 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
           )}
         </td>
         <td
-          className="guest-desk-td guest-desk-td--status guest-desk-td--toggle guest-desk-td--center"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="guest-desk-td--status-inner">
-            {entryMixedGroup ? (
-              <GuestListStatusBadge
-                allEntered={allEntered}
-                entryMixed={entryMixed}
-                enteredCount={enteredCount}
-                total={members.length}
-              />
-            ) : null}
-            <GuestBinaryStatusToggle
-              noActive={entryPendingOn}
-              yesActive={entryEnteredOn}
-              onNo={() => void saveStatus('pending')}
-              onYes={() => void saveStatus('entered')}
-              noLabel={statusTag.enterNo}
-              yesLabel={statusTag.enterYes}
-              noTitle="סמן הכול: לא נכנס"
-              yesTitle="סמן הכול: נכנס"
-              noAriaLabel={guestStatusText.pending}
-              yesAriaLabel={guestStatusText.entered}
-              groupAriaLabel="סנכרון כניסה לכל הכרטיסים"
-            />
-          </div>
-        </td>
-        <td
-          className="guest-desk-td guest-desk-td--center guest-desk-td--toggle"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GuestBinaryStatusToggle
-            noActive={!cardOpenAll}
-            yesActive={cardOpenAll}
-            onNo={() => void saveCardOpened('not_opened')}
-            onYes={() => void saveCardOpened('opened')}
-            noLabel={cardOpenMixed ? inviteMixedLabel(cardOpenedCount, members.length) : statusTag.enterNo}
-            yesLabel={statusTag.enterYes}
-            noTitle="לא נפתח דף"
-            yesTitle="נפתח דף"
-            noAriaLabel={
-              cardOpenMixed
-                ? `לא נפתח — ${inviteMixedLabel(cardOpenedCount, members.length)}`
-                : 'לא נפתח דף הכרטיס'
-            }
-            yesAriaLabel="נפתח דף הכרטיס"
-            groupAriaLabel="פתח כרטיס"
-          />
-        </td>
-        <td
-          className="guest-desk-td guest-desk-td--center guest-desk-td--toggle"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GuestBinaryStatusToggle
-            noActive={!inviteAllSent}
-            yesActive={inviteAllSent}
-            onNo={() => void saveInviteSent('not_sent')}
-            onYes={() => void saveInviteSent('sent')}
-            noLabel={inviteMixed ? inviteMixedLabel(inviteSentCount, members.length) : statusTag.enterNo}
-            yesLabel={statusTag.enterYes}
-            noTitle={inviteMixed ? 'חלק — לא לכולם נשלחה הזמנה' : 'לא נשלחה הזמנה'}
-            yesTitle="הוזמן (וואטסאפ)"
-            noAriaLabel={inviteMixed ? 'חלקי הזמנה' : 'לא נשלחה הזמנה'}
-            yesAriaLabel="הוזמן"
-            groupAriaLabel="שליחת הזמנה"
-          />
-        </td>
-        <td
           className="guest-desk-td guest-desk-td--actions"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="guest-desk-actions guest-desk-actions--row" role="group" aria-label="פעולות שורה">
             <button
               type="button"
-              className="guest-desk-act guest-desk-act--ico guest-desk-act--copy"
-              title="העתק מספר טלפון"
-              aria-label="העתק מספר טלפון"
-              onClick={() => void onCopyPhoneE164(rep.id)}
-            >
-              <DeskIcoPhone />
-            </button>
-            <button
-              type="button"
-              className="guest-desk-act guest-desk-act--ico guest-desk-act--copy"
+              className="guest-desk-act guest-desk-act--ico guest-desk-act--copy guest-desk-act--copy-wa"
               title="העתק הודעת WhatsApp"
               aria-label="העתק הודעת WhatsApp"
               onClick={() => void onCopyWaMessage(rep.id)}
             >
+              <span className="guest-desk-act__emoji" aria-hidden>
+                💬
+              </span>
               <DeskIcoChat />
             </button>
             {onSendTwilio ? (
-              <GuestSendWhatsAppButton
+              <GuestWhatsAppUnifiedControl
                 guestId={rep.id}
                 phone={phone}
                 source={payAtDoor ? 'pay_at_door' : 'list'}
-                inviteAllSent={inviteAllSent}
-                busy={twilioSendingGuestId === rep.id}
-                onSend={onSendTwilio}
+                members={members}
                 twilioTemplateApproved={twilioTemplateApproved}
+                twilioSendingGuestId={twilioSendingGuestId}
+                onSend={onSendTwilio}
+                onOpenChat={onOpenWaChat}
                 variant="desk"
-                compact
               />
             ) : null}
             <button

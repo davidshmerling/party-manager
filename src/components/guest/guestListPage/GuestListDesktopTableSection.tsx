@@ -20,12 +20,11 @@ type Props = {
   onChange: GuestGroupRowProps['onChange']
   onDelete: GuestGroupRowProps['onDelete']
   onCopyWaMessage: GuestGroupRowProps['onCopyWaMessage']
-  onCopyPhoneE164: GuestGroupRowProps['onCopyPhoneE164']
   onSendTwilio?: GuestGroupRowProps['onSendTwilio']
+  onOpenWaChat: GuestGroupRowProps['onOpenWaChat']
   twilioTemplateApproved?: GuestGroupRowProps['twilioTemplateApproved']
   twilioSendingGuestId?: GuestGroupRowProps['twilioSendingGuestId']
   onCardPress: GuestGroupRowProps['onCardPress']
-  onStatusCommitted: GuestGroupRowProps['onStatusCommitted']
   handleAddTicket: (members: Guest[]) => void | Promise<void>
   handleRemoveOneTicket: (members: Guest[]) => void | Promise<void>
   ticketActionKey: string | null
@@ -35,6 +34,8 @@ type Props = {
   saveIncomeRecipientForMembers: (members: Guest[], recipientValue: string) => void | Promise<void>
 }
 
+const TABLE_COLS = 6
+
 export function GuestListDesktopTableSection({
   listGroups,
   doorGroups,
@@ -43,12 +44,11 @@ export function GuestListDesktopTableSection({
   onChange,
   onDelete,
   onCopyWaMessage,
-  onCopyPhoneE164,
   onSendTwilio,
+  onOpenWaChat,
   twilioTemplateApproved,
   twilioSendingGuestId,
   onCardPress,
-  onStatusCommitted,
   handleAddTicket,
   handleRemoveOneTicket,
   ticketActionKey,
@@ -67,9 +67,6 @@ export function GuestListDesktopTableSection({
             <col className="guest-desk-col guest-desk-col--price" />
             <col className="guest-desk-col guest-desk-col--recipient" />
             <col className="guest-desk-col guest-desk-col--tickets" />
-            <col className="guest-desk-col guest-desk-col--tag-entry" />
-            <col className="guest-desk-col guest-desk-col--tag-narrow" />
-            <col className="guest-desk-col guest-desk-col--tag-narrow" />
             <col className="guest-desk-col guest-desk-col--actions" />
           </colgroup>
           <thead>
@@ -88,15 +85,6 @@ export function GuestListDesktopTableSection({
               </th>
               <th scope="col" className="guest-desk-th guest-desk-th--tickets">
                 כמות כרטיסים
-              </th>
-              <th scope="col" className="guest-desk-th guest-desk-th--tag">
-                כניסה
-              </th>
-              <th scope="col" className="guest-desk-th guest-desk-th--tag">
-                פתח כרטיס
-              </th>
-              <th scope="col" className="guest-desk-th guest-desk-th--tag">
-                שליחת הזמנה
               </th>
               <th scope="col" className="guest-desk-th guest-desk-th--actions">
                 פעולות
@@ -120,12 +108,11 @@ export function GuestListDesktopTableSection({
                   onChange={onChange}
                   onDelete={onDelete}
                   onCopyWaMessage={onCopyWaMessage}
-                  onCopyPhoneE164={onCopyPhoneE164}
                   onSendTwilio={onSendTwilio}
+                  onOpenWaChat={onOpenWaChat}
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}
-                  onStatusCommitted={onStatusCommitted}
                   onAddTicket={() => void handleAddTicket(members)}
                   onRemoveOneTicket={
                     members.length > 1 ? () => void handleRemoveOneTicket(members) : undefined
@@ -147,7 +134,7 @@ export function GuestListDesktopTableSection({
             })}
             {doorGroups.length > 0 ? (
               <tr className="guest-desk-tr guest-desk-tr--subsection">
-                <td className="guest-desk-td guest-desk-td--subsection" colSpan={9}>
+                <td className="guest-desk-td guest-desk-td--subsection" colSpan={TABLE_COLS}>
                   תשלום בכניסה
                 </td>
               </tr>
@@ -169,12 +156,11 @@ export function GuestListDesktopTableSection({
                   onChange={onChange}
                   onDelete={onDelete}
                   onCopyWaMessage={onCopyWaMessage}
-                  onCopyPhoneE164={onCopyPhoneE164}
                   onSendTwilio={onSendTwilio}
+                  onOpenWaChat={onOpenWaChat}
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}
-                  onStatusCommitted={onStatusCommitted}
                   incomeLineIds={inc.ids}
                   incomeAmount={inc.amount}
                   incomeRecipientLabel={inc.recipientLabel}

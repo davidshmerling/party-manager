@@ -8,6 +8,7 @@ import { GuestListPageBanners } from '../components/guest/guestListPage/GuestLis
 import { GuestListPageHeader } from '../components/guest/guestListPage/GuestListPageHeader'
 import { GuestListPasteBulk } from '../components/guest/guestListPage/GuestListPasteBulk'
 import { GuestListSearchFilters } from '../components/guest/guestListPage/GuestListSearchFilters'
+import { GuestWhatsAppChatSheet } from '../components/guest/GuestWhatsAppChatSheet'
 import { useGuestListPageModel } from '../hooks/useGuestListPageModel'
 
 export function GuestListPage() {
@@ -108,8 +109,8 @@ export function GuestListPage() {
                   onChange={m.persistGuestRows}
                   onDelete={m.rowDeleteGroup}
                   onCopyWaMessage={m.rowCopyWhatsAppMessage}
-                  onCopyPhoneE164={m.rowCopyGuestPhoneE164}
                   onSendTwilio={m.rowSendTwilio}
+                  onOpenWaChat={m.openWaChat}
                   twilioTemplateApproved={m.twilioTemplateApproved}
                   twilioSendingGuestId={m.twilioSendingGuestId}
                   onCardPress={m.onGuestCardFocus}
@@ -131,12 +132,11 @@ export function GuestListPage() {
                     onChange={m.persistGuestRows}
                     onDelete={m.rowDeleteGroup}
                     onCopyWaMessage={m.rowCopyWhatsAppMessage}
-                    onCopyPhoneE164={m.rowCopyGuestPhoneE164}
                     onSendTwilio={m.rowSendTwilio}
+                    onOpenWaChat={m.openWaChat}
                     twilioTemplateApproved={m.twilioTemplateApproved}
                     twilioSendingGuestId={m.twilioSendingGuestId}
                     onCardPress={m.onGuestCardFocus}
-                    onStatusCommitted={m.onStatusCommitted}
                     handleAddTicket={m.handleAddTicket}
                     handleRemoveOneTicket={m.handleRemoveOneTicket}
                     ticketActionKey={m.ticketActionKey}
@@ -164,6 +164,15 @@ export function GuestListPage() {
       </div>
 
       <MobileToast toast={m.mobileToast} onDismiss={() => m.setMobileToast(null)} />
+
+      {m.currentEventId ? (
+        <GuestWhatsAppChatSheet
+          eventId={m.currentEventId}
+          guestId={m.waChatGuestId}
+          open={m.waChatGuestId != null}
+          onClose={m.closeWaChat}
+        />
+      ) : null}
     </div>
   )
 }

@@ -1,21 +1,10 @@
 import { memo, useEffect, useState } from 'react'
-import { GuestListStatusBadge, guestStatusText } from './GuestListStatusBadge'
-import { GuestBinaryStatusToggle } from './GuestBinaryStatusToggle'
-import { statusTag, inviteMixedLabel } from './guestStatusTags'
 import { GuestTicketStepper } from './GuestTicketStepper'
 import { IncomeRecipientSelect } from './IncomeRecipientSelect'
-import { GuestSendWhatsAppButton } from './GuestSendWhatsAppButton'
+import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
 
 export type { GuestGroupRowProps as GuestGroupCardProps }
-
-function MobPrimarySvgPhone() {
-  return (
-    <svg className="guest-mob-primary-ico-svg" width={17} height={17} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M6.62 10.79a15.15 15.15 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.36 11.36 0 003.57.57 1 1 0 011 1V21a1 1 0 01-1 1C10.07 22 2 13.93 2 3a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.24 1.02l-2.21 2.2z" />
-    </svg>
-  )
-}
 
 function MobPrimarySvgChat() {
   return (
@@ -44,8 +33,8 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     isFocused,
     onDelete,
     onCopyWaMessage,
-    onCopyPhoneE164,
     onSendTwilio,
+    onOpenWaChat,
     twilioTemplateApproved = true,
     twilioSendingGuestId = null,
     onCardPress,
@@ -78,27 +67,9 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     setName,
     phone,
     setPhone,
-    multi,
-    allEntered,
-    entryMixed,
-    enteredCount,
-    displayStatus,
-    inviteAllSent,
-    inviteMixed,
-    cardOpenAll,
-    cardOpenMixed,
-    cardOpenedCount,
-    inviteSentCount,
     members,
     saveField,
-    saveStatus,
-    saveCardOpened,
-    saveInviteSent,
   } = useGuestGroupRowModel(props)
-
-  const entryMixedGroup = entryMixed && multi
-  const entryPendingOn = !entryMixedGroup && displayStatus === 'pending'
-  const entryEnteredOn = !entryMixedGroup && displayStatus === 'entered'
 
   return (
     <article
@@ -106,7 +77,6 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
       className={`guest-mob-card guest-mob-card--compact${searchHighlight ? ' guest-mob-card--search-flash' : ''}${isFocused ? ' guest-mob-card--focused' : ''}`}
       data-guest-group={groupKey}
     >
-      {/* שורה 1: מספר (1.) + שם */}
       <div className="guest-mob-compact__r1">
         <div className="guest-mob-compact__r1-inner">
           <span className="guest-mob-compact__num" onClick={() => onCardPress(groupKey)} role="presentation">
@@ -124,7 +94,6 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
         </div>
       </div>
 
-      {/* שורה 2: פלאפון + stepper כרטיסים */}
       <div className="guest-mob-compact__r2">
         {payAtDoor ? (
           <span className="guest-mob-compact__phone guest-mob-compact__phone--static muted" aria-label="מקור">
@@ -211,80 +180,11 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
         <div
           className="guest-mob-compact__chips guest-mob-compact__chips--manage-strip"
           role="group"
-          aria-label="כניסה, כרטיס, הזמנה ופעולות"
+          aria-label="הזמנה ופעולות"
         >
-          {entryMixedGroup ? (
-            <div className="guest-mob-cpair guest-mob-cpair--badge" role="presentation">
-              <span className="guest-mob-cpair__hint">כניסה</span>
-              <GuestListStatusBadge
-                allEntered={allEntered}
-                entryMixed={entryMixed}
-                enteredCount={enteredCount}
-                total={members.length}
-              />
-            </div>
-          ) : null}
-          <GuestBinaryStatusToggle
-            mobileHint={entryMixedGroup ? 'סנכרן' : 'כניסה'}
-            noActive={entryPendingOn}
-            yesActive={entryEnteredOn}
-            onNo={() => void saveStatus('pending')}
-            onYes={() => void saveStatus('entered')}
-            noLabel={statusTag.enterNo}
-            yesLabel={statusTag.enterYes}
-            noTitle="סמן הכול: לא נכנס"
-            yesTitle="סמן הכול: נכנס"
-            noAriaLabel={guestStatusText.pending}
-            yesAriaLabel={guestStatusText.entered}
-            groupAriaLabel="סטטוס כניסה"
-          />
-          <GuestBinaryStatusToggle
-            mobileHint="כרטיס"
-            noActive={!cardOpenAll}
-            yesActive={cardOpenAll}
-            onNo={() => void saveCardOpened('not_opened')}
-            onYes={() => void saveCardOpened('opened')}
-            noLabel={cardOpenMixed ? inviteMixedLabel(cardOpenedCount, members.length) : statusTag.enterNo}
-            yesLabel={statusTag.enterYes}
-            noTitle="לא נפתח דף"
-            yesTitle="נפתח דף הכרטיס"
-            noAriaLabel={
-              cardOpenMixed
-                ? `לא נפתח — ${inviteMixedLabel(cardOpenedCount, members.length)}`
-                : 'לא נפתח דף הכרטיס'
-            }
-            yesAriaLabel="נפתח דף הכרטיס"
-            groupAriaLabel="פתיחת דף כרטיס"
-          />
-          <GuestBinaryStatusToggle
-            mobileHint="שליחת הזמנה"
-            noActive={!inviteAllSent}
-            yesActive={inviteAllSent}
-            onNo={() => void saveInviteSent('not_sent')}
-            onYes={() => void saveInviteSent('sent')}
-            noLabel={inviteMixed ? inviteMixedLabel(inviteSentCount, members.length) : statusTag.enterNo}
-            yesLabel={statusTag.enterYes}
-            noTitle={inviteMixed ? 'חלק — לא לכולם נשלחה הזמנה' : 'לא נשלחה הזמנה'}
-            yesTitle="הוזמן (וואטסאפ)"
-            noAriaLabel={inviteMixed ? 'חלקי הזמנה' : 'לא נשלחה הזמנה'}
-            yesAriaLabel="הוזמן"
-            groupAriaLabel="שליחת הזמנה"
-          />
           <button
             type="button"
-            className="guest-mob-primary-ico guest-mob-primary-ico--phone"
-            title="העתק מספר טלפון"
-            aria-label="העתק מספר טלפון"
-            onClick={(e) => {
-              e.stopPropagation()
-              void onCopyPhoneE164(rep.id)
-            }}
-          >
-            <MobPrimarySvgPhone />
-          </button>
-          <button
-            type="button"
-            className="guest-mob-primary-ico guest-mob-primary-ico--copy"
+            className="guest-mob-primary-ico guest-mob-primary-ico--copy guest-mob-primary-ico--copy-wa"
             title="העתק הודעת WhatsApp"
             aria-label="העתק הודעת WhatsApp"
             onClick={(e) => {
@@ -292,21 +192,23 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
               void onCopyWaMessage(rep.id)
             }}
           >
+            <span className="guest-mob-primary-ico-emoji" aria-hidden>
+              💬
+            </span>
             <MobPrimarySvgChat />
           </button>
           {onSendTwilio ? (
-            <div className="guest-mob-primary-ico-wa">
-              <GuestSendWhatsAppButton
-                guestId={rep.id}
-                phone={phone}
-                source={payAtDoor ? 'pay_at_door' : 'list'}
-                inviteAllSent={inviteAllSent}
-                busy={twilioSendingGuestId === rep.id}
-                onSend={onSendTwilio}
-                twilioTemplateApproved={twilioTemplateApproved}
-                variant="mob"
-              />
-            </div>
+            <GuestWhatsAppUnifiedControl
+              guestId={rep.id}
+              phone={phone}
+              source={payAtDoor ? 'pay_at_door' : 'list'}
+              members={members}
+              twilioTemplateApproved={twilioTemplateApproved}
+              twilioSendingGuestId={twilioSendingGuestId}
+              onSend={onSendTwilio}
+              onOpenChat={onOpenWaChat}
+              variant="mob"
+            />
           ) : null}
           <button
             type="button"

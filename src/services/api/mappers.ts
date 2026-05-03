@@ -34,6 +34,16 @@ export function mapGuestRow(row: Record<string, unknown>): Guest {
       row.invite_sent_method != null && String(row.invite_sent_method).trim()
         ? String(row.invite_sent_method).trim()
         : null,
+    whatsapp_last_inbound_at:
+      row.whatsapp_last_inbound_at != null ? String(row.whatsapp_last_inbound_at) : null,
+    whatsapp_invite_twilio_sid:
+      row.whatsapp_invite_twilio_sid != null && String(row.whatsapp_invite_twilio_sid).trim()
+        ? String(row.whatsapp_invite_twilio_sid).trim()
+        : null,
+    whatsapp_invite_twilio_status:
+      row.whatsapp_invite_twilio_status != null && String(row.whatsapp_invite_twilio_status).trim()
+        ? String(row.whatsapp_invite_twilio_status).trim().toLowerCase()
+        : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
     source: row.source === 'pay_at_door' ? 'pay_at_door' : 'list',

@@ -499,3 +499,11 @@
   line-height: 1.45;
 }
 
+.banner.paste-bulk-wa-queue {
+  border-style: dashed;
+}
+
+.paste-bulk-wa-queue__msg {
+  font-weight: 400;
+}
+

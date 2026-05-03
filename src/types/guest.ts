@@ -23,8 +23,29 @@ export interface Guest {
   whatsapp_invite_sent_at: string | null
   /** איך סומנה השליחה: ‎whatsapp_web‎, ‎manual_admin‎, ‎twilio‎, ‎local_script‎ וכו׳ */
   invite_sent_method: string | null
+  /** מועד הודעת WhatsApp נכנסת אחרונה מהאורח (חלון 24 שעות) */
+  whatsapp_last_inbound_at: string | null
+  /** SID הודמת הזמנה אחרונה דרך Twilio */
+  whatsapp_invite_twilio_sid: string | null
+  /** סטטוס Twilio להזמנה: queued, sent, delivered, read, … */
+  whatsapp_invite_twilio_status: string | null
   created_at: string
   updated_at: string
+}
+
+/** שורה מטבלת ‎whatsapp_messages‎ (קריאה בלבד מהלקוח) */
+export type WhatsAppMessageRow = {
+  id: string
+  event_id: string
+  guest_id: string
+  from_phone: string
+  to_phone: string
+  body: string
+  direction: 'inbound' | 'outbound'
+  status: string
+  twilio_sid: string | null
+  message_kind: 'invite' | 'session'
+  created_at: string
 }
 
 export type ScanResult =
@@ -52,21 +73,19 @@ export interface SendWhatsAppResponse {
 export interface SendGuestTwilioSuccess {
   ok: true
   twilio_sid: string
+  /** סטטוס ראשוני מה-API של Twilio (למשל queued, sent) */
+  twilio_status?: string
   sent_at: string
   marked_guest_ids: string[]
 }
 
-/** תוצאת ייבוא מרוכז — או הכל מצליח (INSERT אחד) או כלום + לוג שגיאות לפי שורה */
-export type BulkPasteResult =
-  | {
-      ok: true
-      added: number
-      created: Guest[]
-      /** שורות הכנסה שנוצרו בייבוא — לעדכון מקומי בלי טעינת רשימה מלאה */
-      financeLinesCreated: EventFinanceLine[]
-      /** שמור לתאימות — תמיד 0 (כרטיס נוסף לאותו שם+טלפון מותר בייבוא) */
-      skippedAlreadyInEvent: number
-      /** שמור לתאימות — תמיד 0 */
-      skippedDuplicateInPaste: number
-    }
-  | { ok: false; errors: string[] }
+/** תוצאת ייבוא מרוכז מ־Edge Function ‎bulk-import-guests */
+export type BulkImportGuestsResult = {
+  ok: boolean
+  added: number
+  skipped: number
+  queuedForWhatsapp: number
+  errors: string[]
+  createdGuests: Guest[]
+  financeLinesCreated: EventFinanceLine[]
+}

@@ -16,10 +16,10 @@ export type GuestGroupRowProps = {
   onChange: (updatedGuests: Guest[]) => Promise<void>
   onDelete: (ids: string[]) => void
   onCopyWaMessage: (id: string) => void
-  /** העתקת מספר בפורמט ‎+9725…‎ לפי אורח מייצג */
-  onCopyPhoneE164: (guestId: string) => void
   /** שליחת הזמנה בווטסאפ דרך Twilio (Edge Function + Secrets) */
   onSendTwilio?: (guestId: string) => Promise<void>
+  /** פתיחת שיחת WhatsApp (מגירה / מודל) */
+  onOpenWaChat: (guestId: string) => void
   /** כש-false — תבנית WhatsApp טרם אושרה ב-Meta; כפתור Twilio חסום */
   twilioTemplateApproved?: boolean
   /** כשליחה ל-Twilio פעילה לאותו אורח מייצג */

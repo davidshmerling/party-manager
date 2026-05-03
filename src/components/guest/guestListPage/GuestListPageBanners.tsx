@@ -5,7 +5,12 @@ type Props = {
   pasteErrorLog: string[] | null
 }
 
-export function GuestListPageBanners({ error, listNotice, pasteMsg, pasteErrorLog }: Props) {
+export function GuestListPageBanners({
+  error,
+  listNotice,
+  pasteMsg,
+  pasteErrorLog,
+}: Props) {
   return (
     <>
       {error && <div className="banner error">{error}</div>}
@@ -13,7 +18,7 @@ export function GuestListPageBanners({ error, listNotice, pasteMsg, pasteErrorLo
       {pasteMsg && <div className="banner info">{pasteMsg}</div>}
       {pasteErrorLog && pasteErrorLog.length > 0 && (
         <div className="banner error paste-error-log" role="alert">
-          <strong>לא בוצעה הוספה — יש לתקן ולנסות שוב.</strong>
+          <strong>שגיאות בייבוא — בדקו את הרשימה.</strong>
           <ul className="paste-error-ul">
             {pasteErrorLog.map((line, i) => (
               <li key={i}>{line}</li>
