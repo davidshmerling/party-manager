@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/images/:path*", "destination": "/images/:path*" },
+    { "source": "/party-gallery/:path*", "destination": "/party-gallery/:path*" },
+    { "source": "/favicon.svg", "destination": "/favicon.svg" },
+    { "source": "/icons.svg", "destination": "/icons.svg" },
+    { "source": "/send_whatsapp.py", "destination": "/send_whatsapp.py" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -1,0 +1,19 @@
+/**
+ * ניהול אורחים — מובייל (מפוצל תחת styles/mobile-guest/partials/)
+ */
+@import './styles/mobile-guest/partials/01-intro-and-card.css';
+@import './styles/mobile-guest/partials/02-status-badges.css';
+@import './styles/mobile-guest/partials/03-toggle-segment.css';
+@import './styles/mobile-guest/partials/04-mobile-buttons.css';
+@import './styles/mobile-guest/partials/05-ticket-detail.css';
+@import './styles/mobile-guest/partials/06-compact-card.css';
+@import './styles/mobile-guest/partials/07-phone-stepper.css';
+@import './styles/mobile-guest/partials/08-toggle-hint-row.css';
+@import './styles/mobile-guest/partials/09-sticky-search.css';
+@import './styles/mobile-guest/partials/10-toast.css';
+@import './styles/mobile-guest/partials/11-add-guest-columns.css';
+@import './styles/mobile-guest/partials/12-add-guest-form-row.css';
+@import './styles/mobile-guest/partials/13-guest-manage-page.css';
+@import './styles/mobile-guest/partials/14-no-hover-desktop.css';
+@import './styles/mobile-guest/partials/15-phone-compact-breakpoint.css';
+@import './styles/mobile-guest/partials/16-whatsapp-blue.css';

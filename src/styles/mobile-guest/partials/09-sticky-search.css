@@ -1,0 +1,92 @@
+/* חיפוש דביק — נשאר למעלה בגלילה; המיון ב־.guest-mob-sort-section (לא דביק) */
+.guest-mob-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--mob-bg);
+  padding: 0.5rem 0 0.65rem;
+  margin: 0 0 0.5rem;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.guest-mob-sticky__input {
+  width: 100%;
+  min-height: var(--mob-touch);
+  font-size: 16px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  box-sizing: border-box;
+}
+
+.guest-mob-sort-section {
+  margin: 0 0 0.5rem;
+}
+
+.guest-search-bar__row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.12rem 0.4rem 0.12rem 0.3rem;
+  box-sizing: border-box;
+}
+
+.guest-search-bar__icon {
+  flex-shrink: 0;
+  color: #a1a1aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-mob-sticky.guest-search-bar {
+  padding: 0.35rem 0 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.guest-search-bar__input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: 38px;
+  padding: 0.3rem 0.2rem !important;
+}
+
+.guest-search-bar__input:focus {
+  outline: none;
+}
+
+.guest-mob-sticky .guest-mob-label.guest-search-bar__label {
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.guest-mob-sort-section__label {
+  width: 100%;
+}
+
+.guest-mob-seg--sort {
+  margin-top: 0;
+  flex-wrap: wrap;
+  border: none;
+  gap: 0.35rem;
+  background: transparent;
+}
+
+.guest-mob-seg--sort .guest-mob-seg__btn--sort {
+  border-radius: 10px;
+  border: 1px solid #e4e4e7;
+  box-shadow: none;
+  min-height: 44px;
+  flex: 1 1 100%;
+}
+
+.guest-mob-seg--sort .guest-mob-seg__btn--sort.is-on {
+  background: #eff6ff;
+  color: var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+

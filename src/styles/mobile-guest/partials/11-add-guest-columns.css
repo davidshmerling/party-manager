@@ -1,0 +1,19 @@
+/* הוספת אורח — עמודה אחת במובייל; שתי עמודות במחשב */
+.guest-add-surface {
+  padding: 0.7rem 0.8rem 0.8rem;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.guest-add-surface .sheet-section-title {
+  margin-top: 0;
+}
+
+.guest-add-mob {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+

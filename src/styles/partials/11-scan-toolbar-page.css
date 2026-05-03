@@ -1,0 +1,78 @@
+/* +1 — מתחת לתמונת המצלמה */
+.scan-toolbar--after {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  min-height: 0;
+}
+
+.scan-reader {
+  margin-top: 0.75rem;
+  min-height: 0;
+}
+
+.scan-reader.active {
+  min-height: 260px;
+}
+
+/* מניעת תצוגה כפולה אם נשארו שני video (מירוץ מצלמות) */
+#scan-reader video {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 480px);
+  object-fit: cover;
+}
+
+#scan-reader > video ~ video {
+  display: none !important;
+}
+
+.scan-result {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.scan-result.ok {
+  background: #ecfdf5;
+  border: 2px solid #34d399;
+  color: #065f46;
+}
+
+.scan-result.warn {
+  background: #fffbeb;
+  border: 2px solid #fbbf24;
+  color: #92400e;
+}
+
+.scan-result.bad {
+  background: #fef2f2;
+  border: 2px solid #f87171;
+  color: #991b1b;
+}
+
+.scan-result-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.scan-result-name {
+  margin-top: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.scan-result-sub {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.guest-card-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: #f4f4f5;
+}
+

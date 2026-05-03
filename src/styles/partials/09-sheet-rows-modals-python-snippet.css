@@ -1,0 +1,250 @@
+/* חלק מהכרטיסים נסרקו — בין pending ל-entered */
+.sheet-row.entered-partial {
+  background: #eff6ff;
+}
+
+.guest-detail-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-inline-end: 0.15rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: #e4e4e7;
+  color: #3f3f46;
+  cursor: pointer;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.guest-detail-toggle:hover {
+  background: #d4d4d8;
+}
+
+.guest-detail-toggle:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+
+.guest-detail-toggle__icon {
+  display: block;
+}
+
+.guest-entry-mixed-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.guest-entry-partial-pill {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.guest-entry-mixed-hint {
+  font-size: 0.75rem;
+}
+
+.guest-times-mixed {
+  cursor: help;
+  border-bottom: 1px dashed #71717a;
+}
+
+.sheet-row--member-detail {
+  background: #f8fafc;
+}
+
+.sheet-row--member-detail .guest-member-detail-label {
+  padding-inline-start: 0.75rem;
+}
+
+.guest-member-detail-indent {
+  display: inline-block;
+  margin-inline-end: 0.5rem;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.guest-member-code {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.sheet-link-opened {
+  color: #047857;
+  font-weight: 600;
+}
+
+.sheet-link-not-opened {
+  color: #a1a1aa;
+}
+
+.sheet-card-cell {
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sheet-col-ticket-count {
+  text-align: center;
+  vertical-align: middle;
+  width: 5.75rem;
+  white-space: nowrap;
+}
+
+.sheet-ticket-count-single {
+  font-weight: 600;
+  color: #71717a;
+  font-size: 0.9rem;
+}
+
+.guest-dup-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #e4e4e7;
+  color: #3f3f46;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.guest-dup-badge--cell {
+  margin: 0 auto;
+}
+
+.guest-card-carousel-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin: 1rem auto 0;
+  max-width: 22rem;
+  padding: 0.75rem 0.5rem;
+}
+
+.guest-card-carousel-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #52525b;
+}
+
+.guest-card-carousel-hint {
+  width: 100%;
+  text-align: center;
+  margin: 0.25rem 0 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.admins-dispname-cell {
+  min-width: 12rem;
+  max-width: 22rem;
+}
+
+.admins-dispname-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admins-dispname-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+
+.admins-dispname-btn {
+  flex-shrink: 0;
+}
+
+.banner {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.banner.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.banner.info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+}
+
+.banner.ok {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.modal-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.guest-wa-invite-sent {
+  color: #047857;
+  font-weight: 600;
+}
+
+.guest-wa-invite-pending {
+  color: #a1a1aa;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+.modal--wide {
+  max-width: min(720px, 96vw);
+}
+

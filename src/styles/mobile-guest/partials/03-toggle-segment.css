@@ -1,0 +1,43 @@
+/* מקטע דו-מצב */
+.guest-mob-seg {
+  display: flex;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e4e4e7;
+  margin-bottom: 0.75rem;
+}
+
+.guest-mob-seg--small {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.guest-mob-seg__btn {
+  flex: 1;
+  min-height: var(--mob-touch);
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  background: #fafafa;
+  color: #3f3f46;
+  cursor: pointer;
+  font: inherit;
+}
+
+.guest-mob-seg__btn--ok {
+  color: #1d4ed8;
+}
+
+.guest-mob-seg__btn.is-on {
+  background: #eff6ff;
+  color: var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.guest-mob-seg__btn--ok.is-on {
+  background: #dbeafe;
+  color: #1e40af;
+  box-shadow: inset 0 0 0 2px #60a5fa;
+}
+

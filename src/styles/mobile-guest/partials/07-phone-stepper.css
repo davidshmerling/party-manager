@@ -1,0 +1,91 @@
+/* פלאפון + [ − | n | + ] */
+.guest-mob-compact__r2-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.guest-mob-compact__r2-line .guest-mob-compact__phone {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+}
+
+.guest-ticket-stepper--mobile {
+  min-height: 30px;
+  max-height: 32px;
+  flex-shrink: 0;
+}
+
+.guest-ticket-stepper--mobile .guest-ticket-stepper__btn {
+  min-width: 1.5rem;
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+}
+
+.guest-mob-compact__phone {
+  width: 100%;
+  min-height: 30px;
+  padding: 0.15rem 0.3rem;
+  font-size: 0.8rem;
+  color: #71717a;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.guest-mob-compact__phone:focus {
+  outline: none;
+  border-color: #a1a1aa;
+  color: #3f3f46;
+}
+
+.guest-mob-compact__r3 {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+
+.guest-mob-compact__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.3rem 0.45rem;
+}
+
+.guest-mob-compact__chips .guest-desk-pill-row {
+  align-self: center;
+}
+
+.guest-mob-compact__chips--sub {
+  flex: 1;
+  min-width: 0;
+  gap: 0.2rem 0.3rem;
+}
+
+.guest-mob-cpair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.1rem;
+  max-width: 100%;
+}
+
+.guest-mob-cpair__hint {
+  width: 100%;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin-bottom: 0.05rem;
+}
+

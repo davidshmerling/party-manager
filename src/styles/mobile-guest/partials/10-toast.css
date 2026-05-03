@@ -1,0 +1,64 @@
+/* טוסט */
+.mobile-toast {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: min(400px, calc(100% - 1.5rem));
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: mobile-toast-in 0.2s ease;
+}
+
+@keyframes mobile-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.mobile-toast--ok {
+  background: #ecfdf3;
+  color: #14532d;
+  border: 1px solid #86efac;
+}
+
+.mobile-toast--err {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.mobile-toast--info {
+  background: #fff;
+  color: #18181b;
+  border: 1px solid #e4e4e7;
+}
+
+.mobile-toast--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: mobile-toast-in-center 0.2s ease;
+}
+
+@keyframes mobile-toast-in-center {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+

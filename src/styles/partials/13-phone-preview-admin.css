@@ -1,0 +1,152 @@
+/* סימולטור טלפון — תצוגה מקדימה באדמין */
+.device-phone-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.device-phone-preview__caption {
+  margin: 0;
+  text-align: center;
+  max-width: 22rem;
+}
+
+.device-phone-preview__chassis {
+  position: relative;
+  padding: 11px;
+  border-radius: 44px;
+  background: linear-gradient(155deg, #3a3a3c 0%, #1c1c1e 42%, #0d0d0f 100%);
+  box-shadow:
+    0 28px 56px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.07) inset,
+    0 1px 0 rgba(255, 255, 255, 0.12) inset;
+}
+
+.device-phone-preview__island {
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(34%, 108px);
+  height: 27px;
+  border-radius: 999px;
+  background: #0a0a0a;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.device-phone-preview__screen {
+  position: relative;
+  width: min(300px, 88vw);
+  aspect-ratio: 9 / 19;
+  max-height: min(640px, 72vh);
+  border-radius: 34px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+}
+
+/* תוכן כרטיס בתוך «מסך» — כמו דף ציבורי, בלי 100vh; ממורכז אנכית כשיש מקום */
+.guest-card-page--phone-sim {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  justify-content: safe center;
+  padding: 0.75rem 0.25rem;
+  margin: 0;
+  background: linear-gradient(180deg, #e4e9f2 0%, #eceff7 40%, #f2f4fa 100%);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-card-page--phone-sim .guest-card-slider-outer {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+.guest-card-page--phone-sim .guest-card-slide,
+.guest-card-page--phone-sim .guest-card-slide--qr-only {
+  padding: 0 6px;
+}
+
+.guest-card-page--phone-sim .guest-card-slide-inner {
+  max-width: none;
+}
+
+.event-card-scope-note {
+  margin: 0.4rem 0 0;
+  max-width: 40rem;
+}
+
+.event-card-preview-grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .event-card-preview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.event-card-preview-editor .event-card-field {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.event-card-preview-editor .event-card-field > span {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.event-card-preview-editor textarea.input {
+  width: 100%;
+  min-height: 2.5rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.event-card-wa-heading {
+  margin: 1.25rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.event-card-wa-hint {
+  margin: 0 0 0.75rem;
+}
+
+.event-card-wa-textarea {
+  min-height: 8rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.88rem;
+}
+
+.event-card-demo-tickets-field {
+  margin-bottom: 0.75rem;
+}
+
+.event-card-demo-tickets-select {
+  max-width: 8rem;
+  margin-top: 0.35rem;
+}
+
+.wa-placeholder-code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: #f4f4f5;
+  font-size: 0.85em;
+}
+

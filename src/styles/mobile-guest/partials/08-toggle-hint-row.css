@@ -1,0 +1,173 @@
+/* שורה מעל טוגל ×/✓ (מובייל) — בלי flex-wrap שמפצל את הכפתורים */
+.guest-mob-bool-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.guest-mob-bool-hint {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-align: center;
+  width: 100%;
+}
+
+.guest-mob-cpair--badge {
+  flex: 0 1 auto;
+}
+
+.guest-mob-cpair--badge .status-badge {
+  min-height: 22px;
+  min-width: 1.25rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.guest-mob-card--compact .status-badge--entered {
+  background: #22c55e;
+  color: #fff;
+  border-color: #16a34a;
+}
+
+.guest-mob-card--compact .status-badge--pending {
+  background: #ef4444;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+.guest-mob-card--compact .status-badge--partial {
+  background: #f59e0b;
+  color: #fff;
+  border-color: #d97706;
+}
+
+.guest-mob-compact__bar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  margin-top: 0.05rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid #f4f4f5;
+}
+
+.guest-mob-ico {
+  display: block;
+  flex-shrink: 0;
+}
+
+.guest-mob-ico-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  color: #52525b;
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.guest-mob-ico-btn--link {
+  color: #2563eb;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.guest-mob-ico-btn--wa {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.guest-mob-ico-btn--copy {
+  color: #52525b;
+}
+
+.guest-mob-ico-btn--del {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fff;
+}
+
+.guest-mob-ico-btn--del:hover {
+  background: #fee2e2;
+}
+
+.guest-mob-ico-btn:active {
+  transform: scale(0.97);
+}
+
+.guest-mob-compact__bar .guest-send-wa-wrap {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+/* אותו גודל כמו ‎.guest-mob-ico-btn‎ ‎32×32‎ */
+.guest-mob-compact__bar .guest-send-wa-btn--mob {
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 0;
+  gap: 0;
+  font-size: 0;
+  line-height: 0;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.guest-mob-compact__bar .guest-send-wa-btn--mob .guest-send-wa-btn__ico {
+  width: 18px;
+  height: 18px;
+}
+
+.guest-mob-compact__bar .guest-send-wa-btn--mob .guest-send-wa-btn__spin {
+  width: 18px;
+  height: 18px;
+}
+
+.guest-mob-compact__bar .guest-send-wa-btn--mob .guest-send-wa-btn__mark {
+  font-size: 1.05rem;
+}
+
+.guest-mob-compact-sub {
+  margin-top: 0.35rem;
+  padding: 0.3rem 0.25rem 0.25rem;
+  border-top: 1px dashed #e4e4e7;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.guest-mob-compact-sub__id {
+  font-size: 0.7rem;
+  color: #71717a;
+}
+
+.guest-mob-compact-sub__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.2rem;
+}
+

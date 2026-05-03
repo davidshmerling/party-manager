@@ -1,0 +1,10 @@
+/* פלטת אורחים: ווטסאפ בכחול במקום ירוק */
+.guest-list-page--mobile .guest-mob-card .btn-mob--success {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 2px solid #60a5fa;
+}
+
+.guest-add-mob__btn--primary {
+  box-shadow: 0 2px 8px rgb(37 99 235 / 0.25);
+}

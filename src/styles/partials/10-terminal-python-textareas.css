@@ -1,0 +1,85 @@
+.modal h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.scan-page .scan-panel {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 420px;
+}
+
+.scanner-event-home {
+  max-width: 42rem;
+}
+
+.scanner-event-home__stats,
+.scanner-event-home__scan {
+  margin-bottom: 1.25rem;
+}
+
+.scanner-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #18181b;
+}
+
+.scanner-event-home .scan-panel {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 420px;
+}
+
+@media (min-width: 900px) {
+  .scanner-event-home {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 480px);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .scanner-event-home .scan-panel {
+    max-width: 100%;
+  }
+}
+
+.scan-walkin-open {
+  flex-shrink: 0;
+}
+
+.scan-walkin-modal p {
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+  color: #3f3f46;
+}
+
+.scan-walkin-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3f3f46;
+  margin: 0.4rem 0 0.2rem;
+}
+
+.scan-walkin-modal .input {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.scan-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+  margin-bottom: 0.25rem;
+}
+

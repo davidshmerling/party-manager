@@ -1,0 +1,238 @@
+/* רוחב: מחשב עד ‎~1200px, מובייל — מסך מלא (בלי “מנורה” של ‎420px) */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0.75rem clamp(0.5rem, 2vw, 1.5rem) 1.25rem;
+  box-sizing: border-box;
+}
+
+.page-head h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+.muted {
+  color: #71717a;
+}
+
+.muted.small,
+.small {
+  font-size: 0.875rem;
+}
+
+.tiny {
+  font-size: 0.75rem;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+}
+
+.center {
+  text-align: center;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+}
+
+.guest-list-search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.guest-list-search-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guest-list-search-bar__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #52525b;
+  flex-shrink: 0;
+}
+
+.guest-list-search-bar__input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.guest-list-search-bar__hint {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.guest-list-sheet tbody tr.guest-row--search-highlight {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.22);
+}
+
+.guest-list-sort-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.guest-list-sort-bar__sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guest-list-sort-bar__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #52525b;
+  margin-inline-end: 0.15rem;
+}
+
+.guest-list-sort-bar .btn.secondary.small.is-active {
+  background: #e4e4e7;
+  border-color: #a1a1aa;
+  font-weight: 600;
+}
+
+.guest-list-sort-bar__delete {
+  flex-shrink: 0;
+}
+
+.guest-list-sort-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* דף ניהול קבלות — תור אישור גבייה */
+.receipts-flow-intro .receipts-flow-steps {
+  margin: 0.35rem 0 0.65rem;
+  padding-inline-start: 1.25rem;
+  line-height: 1.55;
+}
+
+.receipts-flow-note {
+  margin: 0;
+}
+
+.receipts-empty {
+  margin: 0.35rem 0 0;
+}
+
+.receipts-pending-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.receipts-pending-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.receipts-pending-meta {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.receipts-pending-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #18181b;
+}
+
+.receipts-pending-hint {
+  margin-top: 0.15rem;
+}
+
+.receipts-pending-event {
+  margin-top: 0.35rem;
+}
+
+.receipts-pending-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.receipts-pending-amount {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #166534;
+}
+
+.receipts-pending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.receipts-approved-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.receipts-approved-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.receipts-approved-item:last-child {
+  border-bottom: none;
+}
+
+.receipts-approved-name {
+  font-weight: 500;
+  flex: 1 1 8rem;
+}
+
+.receipts-approved-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.receipts-approved-when {
+  flex-basis: 100%;
+}
+

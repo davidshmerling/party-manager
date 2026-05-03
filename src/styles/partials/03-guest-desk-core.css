@@ -1,0 +1,658 @@
+/* דסקטופ: טבלת אורחים; מובייל: כרטיסיים בלבד — כחול / אפור / אדום */
+.guest-desk {
+  margin-bottom: 0.75rem;
+}
+
+.guest-desk-snapshot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  color: #52525b;
+  margin-bottom: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+}
+
+.guest-desk-snapshot__sep {
+  color: #d4d4d8;
+  font-weight: 300;
+}
+
+.guest-desk-snapshot__metric--ok {
+  color: #1e3a5f;
+}
+
+.guest-desk-snapshot__metric--pending {
+  color: #52525b;
+}
+
+.guest-desk .guest-desk-table {
+  width: 100%;
+  min-width: 56rem;
+  table-layout: auto;
+}
+
+.guest-desk .guest-desk-table.guest-list-guest-table {
+  min-width: 46rem;
+  table-layout: fixed;
+}
+
+.guest-list-guest-table col.guest-desk-col--name {
+  width: 12%;
+}
+
+.guest-list-guest-table col.guest-desk-col--phone {
+  width: 14%;
+}
+
+.guest-list-guest-table col.guest-desk-col--price {
+  width: 5rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--recipient {
+  width: 14%;
+}
+
+.guest-list-guest-table col.guest-desk-col--tickets {
+  width: 6.75rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--tag-entry {
+  width: 7rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--tag-narrow {
+  width: 5rem;
+}
+
+.guest-list-guest-table col.guest-desk-col--actions {
+  min-width: 11rem;
+}
+
+.guest-desk-sheet-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.guest-desk .guest-desk-table.sheet th,
+.guest-desk .guest-desk-table.sheet td {
+  padding: 0.28rem 0.35rem;
+}
+
+.guest-desk .guest-desk-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #f4f4f5;
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 0 #e4e4e7;
+}
+
+.guest-desk-th--num,
+.guest-desk-th--tag,
+.guest-desk-td--center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.guest-desk-th--tag {
+  min-width: 0;
+  padding-inline: 0.15rem !important;
+  white-space: nowrap;
+}
+
+.guest-desk-th--name,
+.guest-desk-td--name {
+  text-align: start;
+  vertical-align: middle;
+  min-width: 5rem;
+}
+
+.guest-desk-th--phone,
+.guest-desk-td--phone {
+  text-align: start;
+  vertical-align: middle;
+  min-width: 11rem;
+}
+
+.guest-desk-th--recipient,
+.guest-desk-td--recipient {
+  text-align: start;
+  vertical-align: middle;
+  min-width: 6.5rem;
+  max-width: 16rem;
+  font-size: 0.82rem;
+}
+
+.guest-desk-recipient {
+  display: block;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+}
+
+select.guest-desk-field--recipient-select {
+  width: 100%;
+  max-width: 15rem;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.35rem;
+}
+
+.guest-mob-compact__r-recipient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.guest-mob-compact__recipient {
+  font-size: 0.9rem;
+  line-height: 1.35;
+  word-break: break-word;
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+select.guest-mob-compact__recipient-select {
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-size: 0.88rem;
+  padding: 0.28rem 0.4rem;
+}
+
+.guest-desk-th--tickets,
+.guest-desk-td--tickets {
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.guest-desk-th--tickets {
+  width: 6.75rem;
+  max-width: 7rem;
+  padding-inline: 0.25rem !important;
+}
+
+.guest-desk-td--tickets {
+  width: 6.75rem;
+  max-width: 7rem;
+}
+
+.guest-desk-tickets-readonly {
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #52525b;
+  user-select: none;
+}
+
+.guest-desk-th--actions,
+.guest-desk-td--actions {
+  text-align: start;
+  vertical-align: middle;
+  min-width: 11rem;
+  max-width: none;
+  white-space: normal;
+}
+
+.guest-desk-tbody tr.guest-desk-tr {
+  transition: background 0.12s ease;
+}
+
+.guest-desk-tbody tr.guest-desk-tr--stripe > td {
+  background: #f7f7f8;
+}
+
+.guest-desk-tbody tr.guest-desk-tr:hover > td {
+  background: #f0f4fa !important;
+}
+
+.guest-desk-tr--search td {
+  box-shadow: inset 0 0 0 2px #2563eb;
+  background: rgb(239 246 255 / 0.55) !important;
+}
+
+.guest-desk-tr--focused td {
+  background: #e8f0fe !important;
+}
+
+.guest-desk-td--num {
+  color: #71717a;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  width: 1.85rem;
+  max-width: 2.1rem;
+  padding-inline: 0.2rem !important;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.guest-desk-th--num {
+  width: 1.85rem;
+  max-width: 2.1rem;
+  padding-inline: 0.2rem !important;
+}
+
+.guest-desk-td--check {
+  text-align: center;
+  vertical-align: middle;
+  width: 1.9rem;
+}
+
+.guest-desk-th--check {
+  width: 1.9rem;
+}
+
+.guest-desk-check {
+  width: 1rem;
+  height: 1rem;
+}
+
+
+.guest-desk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: center;
+  min-height: 2.65rem;
+  width: 100%;
+}
+
+.guest-desk-actions--row {
+  flex-wrap: nowrap;
+  align-items: center;
+  align-content: center;
+  gap: 0.28rem;
+  min-height: unset;
+  width: max-content;
+  max-width: 100%;
+}
+
+.guest-desk-act__ico {
+  display: block;
+  flex-shrink: 0;
+}
+
+.guest-desk-act--ico {
+  min-width: 2rem;
+  width: 2rem;
+  min-height: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.guest-desk-act--ico.guest-desk-act--del {
+  min-width: 2rem;
+  padding-inline: 0;
+}
+
+/* «הצג כרטיס» + «העתק ווטסאפ»: הקבוצה flex-1, שני הכפתורים flex-1 שווה */
+.guest-desk-actions-pair {
+  display: flex;
+  flex: 1 1 0%;
+  min-width: 0;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+
+.guest-desk-actions-pair > .guest-desk-act--grow {
+  flex: 1 1 0%;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+}
+
+.guest-desk-actions > .guest-desk-act--del {
+  flex: 0 0 auto;
+  min-width: 3.5rem;
+  padding-inline: 0.5rem;
+}
+
+.guest-desk-link-external {
+  font-size: 0.88rem;
+  color: #1d4ed8;
+  text-decoration: none;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  background: #eff6ff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  min-height: 2.65rem;
+}
+
+.guest-desk-actions-pair .guest-desk-link-external.guest-desk-act--grow {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.guest-desk-link-external:hover {
+  color: #1e3a8a;
+  background: #dbeafe;
+  border-color: #60a5fa;
+}
+
+.guest-desk-ico-external {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.guest-desk-act {
+  min-height: 2.65rem;
+  min-width: 3.5rem;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #d4d4d8;
+  background: #fff;
+  color: #3f3f46;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.2;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-desk-act--wa {
+  border-color: #93c5fd;
+  color: #1e40af;
+  background: #eff6ff;
+}
+
+.guest-desk-act--wa:hover {
+  background: #dbeafe;
+}
+
+.guest-desk-act--copy {
+  color: #52525b;
+}
+
+.guest-desk-act--copy:hover {
+  background: #f4f4f5;
+}
+
+/* כמו ‎.guest-desk-act--ico‎ — 2rem × 2rem, רק איקון (התווית ב־sr-only) */
+.guest-send-wa-btn--desk-compact {
+  width: 2rem;
+  min-width: 2rem;
+  max-width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+  max-height: 2rem;
+  padding: 0;
+  gap: 0;
+  font-size: 0;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.guest-send-wa-btn--desk-compact .guest-send-wa-btn__ico {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.guest-send-wa-btn--desk-compact .guest-send-wa-btn__spin {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.guest-send-wa-btn--desk-compact .guest-send-wa-btn__mark {
+  font-size: 1rem;
+}
+
+.guest-send-wa-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  flex: 0 1 auto;
+  align-self: center;
+  max-width: 100%;
+}
+
+.guest-send-wa-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.65rem;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.15;
+  box-sizing: border-box;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.06s ease,
+    opacity 0.15s ease;
+}
+
+.guest-send-wa-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.guest-send-wa-btn--mob {
+  min-height: 2rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.74rem;
+  gap: 0.28rem;
+}
+
+.guest-send-wa-btn--mob .guest-send-wa-btn__ico {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.guest-send-wa-btn--primary {
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  color: #fff;
+  border-color: #3730a3;
+  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.28);
+}
+
+.guest-send-wa-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.guest-send-wa-btn--sending {
+  background: #eef2ff;
+  color: #312e81;
+  border-color: #c7d2fe;
+}
+
+.guest-send-wa-btn--success {
+  background: #15803d;
+  color: #fff;
+  border-color: #166534;
+}
+
+.guest-send-wa-btn--error {
+  background: #dc2626;
+  color: #fff;
+  border-color: #b91c1c;
+}
+
+.guest-send-wa-btn--error:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+.guest-send-wa-btn--sent {
+  background: #f4f4f5;
+  color: #71717a;
+  border-color: #e4e4e7;
+  cursor: default;
+  box-shadow: none;
+}
+
+.guest-send-wa-btn--sent:disabled {
+  opacity: 1;
+}
+
+.guest-send-wa-btn__ico {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.98;
+}
+
+.guest-send-wa-btn__spin {
+  display: inline-block;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: guest-send-wa-spin 0.65s linear infinite;
+  vertical-align: middle;
+}
+
+.guest-send-wa-btn__spin--sending {
+  border-color: rgba(67, 56, 202, 0.22);
+  border-top-color: #4338ca;
+}
+
+@keyframes guest-send-wa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.guest-send-wa-btn__txt {
+  white-space: nowrap;
+}
+
+.guest-send-wa-btn__txt--sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.guest-send-wa-btn__mark {
+  line-height: 1;
+  font-weight: 800;
+}
+
+.guest-send-wa-btn--sent .guest-send-wa-btn__mark {
+  color: #16a34a;
+}
+
+.guest-send-wa-btn--success .guest-send-wa-btn__mark {
+  color: #fff;
+}
+
+.guest-desk-act--del {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fff;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.guest-desk-act--del:hover {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #f87171;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.guest-desk-td--name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.guest-desk-field {
+  min-width: 0;
+  max-width: 16rem;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #18181b;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  padding: 0.2rem 0.25rem;
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 6rem;
+}
+
+.guest-desk .guest-desk-table .guest-desk-field:not(.guest-desk-field--static) {
+  max-width: none;
+  min-width: 7rem;
+}
+
+.guest-desk .guest-desk-td--name .guest-desk-field--name {
+  min-width: 4.5rem;
+}
+
+.guest-desk .guest-desk-td--phone .guest-desk-field--phone {
+  min-width: 10.5rem;
+}
+
+.guest-desk-field:hover {
+  background: #fafafa;
+  border-color: #e4e4e7;
+}
+
+.guest-desk-field:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(37 99 235 / 0.25);
+}
+
+.guest-desk-field--name {
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.guest-desk-field--phone {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.guest-desk-toggle {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+

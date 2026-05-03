@@ -1,0 +1,575 @@
+/* דף ניהול אורחים — מעטפת מרכזית, כרטיסים, רקע */
+.guest-manage-page {
+  --guest-manage-bg: #f6f7fb;
+  --guest-manage-card-radius: 20px;
+  --guest-manage-shadow: 0 1px 2px rgb(15 23 42 / 5%), 0 8px 24px rgb(15 23 42 / 6%);
+}
+
+main.main:has(.guest-manage-page) {
+  max-width: min(1200px, 100%);
+  margin-inline: auto;
+  padding: 12px clamp(12px, 3vw, 16px) 1.5rem;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #f6f7fb 0%, #eef1f9 55%, #f6f7fb 100%);
+}
+
+@media (min-width: 700px) {
+  main.main:has(.guest-manage-page) {
+    padding: 24px clamp(16px, 2.5vw, 24px) 2rem;
+  }
+}
+
+.guest-manage-shell {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.guest-manage-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.guest-manage-hero__text {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.guest-manage-hero__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.35rem, 3.5vw, 1.65rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.guest-manage-hero__subtitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.guest-manage-hero__event {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.guest-manage-hero__cta {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.guest-manage-hero__cta .btn {
+  min-height: 44px;
+  padding-inline: 1.15rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+  border: 1px solid #1e40af;
+  box-shadow: 0 2px 8px rgb(37 99 235 / 28%);
+}
+
+.guest-manage-hero__cta .btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.guest-manage-hero__cta .btn:disabled {
+  opacity: 0.45;
+}
+
+@media (max-width: 520px) {
+  .guest-manage-hero__cta {
+    width: 100%;
+  }
+
+  .guest-manage-hero__cta .btn {
+    width: 100%;
+  }
+}
+
+.guest-manage-card {
+  background: #fff;
+  border: 1px solid rgb(226 232 240 / 95%);
+  border-radius: var(--guest-manage-card-radius);
+  box-shadow: var(--guest-manage-shadow);
+  padding: clamp(14px, 2.8vw, 20px);
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.guest-manage-card .guest-add-surface {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.guest-manage-card .guest-add-section .sheet-section-title,
+.guest-manage-card .guest-list-section-title {
+  margin-top: 0;
+}
+
+.guest-list-section-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+
+.guest-manage-tools-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.guest-manage-tools-inner .toolbar--mobile-stack {
+  margin-bottom: 0;
+}
+
+/* חיפוש וסינון — כותרת כרטיס */
+.guest-filters-card-header {
+  margin-bottom: 0.85rem;
+}
+
+.guest-filters-card-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.guest-filters-card-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.guest-filters-search-row {
+  max-width: 42rem;
+}
+
+@media (min-width: 900px) {
+  .guest-filters-search-row {
+    max-width: min(36rem, 100%);
+  }
+}
+
+.guest-filters-search-submit.guest-filters-search-submit--blue {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-inline-start-color: rgb(29 78 216 / 35%);
+}
+
+.guest-filters-search-submit.guest-filters-search-submit--blue:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.guest-filters-toggle-filters {
+  display: none;
+  width: 100%;
+  margin: 0 0 0.5rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 899px) {
+  .guest-filters-toggle-filters {
+    display: block;
+  }
+
+  .guest-filters-grid-wrap:not(.guest-filters-grid-wrap--open) {
+    display: none;
+  }
+}
+
+.guest-list-below-filters {
+  margin-top: 0.35rem;
+  padding-top: 0;
+  border-top: none;
+}
+
+.guest-manage-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.guest-manage-table-card .guest-desk {
+  margin-bottom: 0;
+}
+
+.guest-manage-table-card .guest-desk-sheet-wrap {
+  border: none;
+  border-radius: 0;
+}
+
+/* טבלה מיושרת ימין + גובה שורות */
+.guest-manage-page .guest-desk .guest-desk-table.sheet th,
+.guest-manage-page .guest-desk .guest-desk-table.sheet td {
+  padding: 0.55rem 0.45rem;
+  min-height: 56px;
+  vertical-align: middle;
+}
+
+.guest-manage-page .guest-desk-th--name,
+.guest-manage-page .guest-desk-td--name,
+.guest-manage-page .guest-desk-th--phone,
+.guest-manage-page .guest-desk-td--phone,
+.guest-manage-page .guest-desk-th--recipient,
+.guest-manage-page .guest-desk-td--recipient,
+.guest-manage-page .guest-desk-th--price,
+.guest-manage-page .guest-desk-td--price {
+  text-align: right;
+}
+
+.guest-manage-page .guest-desk .guest-desk-table thead th {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  box-shadow: 0 1px 0 #e2e8f0;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* ריק — כרטיס */
+.guest-empty-card {
+  text-align: center;
+  padding: 2rem 1.25rem;
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--guest-manage-card-radius);
+  margin: 0.5rem 0 0;
+}
+
+.guest-empty-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.guest-empty-card__desc {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.guest-empty-card .btn {
+  min-height: 44px;
+  padding-inline: 1.25rem;
+  border-radius: 12px;
+}
+
+.guest-list-summary--modern {
+  margin-top: 1rem;
+}
+
+.guest-list-summary__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  align-items: baseline;
+  padding: 0.5rem 0 0.65rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.guest-list-summary__entry-row strong {
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+}
+
+/* מובייל — כרטיס אורח */
+.guest-mob-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+}
+
+.guest-mob-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  max-width: 100%;
+}
+
+.guest-mob-pill--entry-no {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.guest-mob-pill--entry-yes {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.guest-mob-pill--entry-mix {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.guest-mob-hero-name {
+  font-size: 1.12rem !important;
+  font-weight: 800 !important;
+}
+
+.guest-mob-hero-phone {
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  background: #f8fafc !important;
+}
+
+/* מחיר + למי שולם — שורה אחת בכרטיס מובייל בניהול אורחים */
+.guest-manage-page .guest-mob-compact__r-price-pay {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-manage-page .guest-mob-compact__r-price-pay .guest-mob-compact__hint--inline {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.guest-manage-page .guest-mob-compact__r-price-pay .guest-mob-compact__price-input {
+  flex: 0 0 auto;
+  width: 4.1rem;
+  max-width: 5rem;
+  min-height: 30px;
+  text-align: center;
+}
+
+.guest-manage-page .guest-mob-compact__r-price-pay .guest-mob-compact__recipient,
+.guest-manage-page .guest-mob-compact__r-price-pay select.guest-mob-compact__recipient-select {
+  flex: 1 1 5.5rem;
+  min-width: 0;
+}
+
+/* כניסה + כרטיס + הזמנה + אייקונים — שורה אחת, גלילה אופקית במסך צר */
+.guest-manage-page .guest-mob-compact__r3--manage-strip {
+  gap: 0;
+  margin-top: 0;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.2rem 0.32rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-top: 0.22rem;
+  margin-top: 0.08rem;
+  border-top: 1px solid #f1f5f9;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-primary-ico {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: 9px;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-primary-ico,
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-primary-ico-wa {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-primary-ico-wa .guest-send-wa-btn--mob {
+  width: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  border-radius: 9px;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-primary-ico-wa .guest-send-wa-btn--mob .guest-send-wa-btn__ico {
+  width: 15px;
+  height: 15px;
+}
+
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-bool-block,
+.guest-manage-page .guest-mob-compact__chips--manage-strip .guest-mob-cpair {
+  flex-shrink: 0;
+}
+
+.guest-mob-primary-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-mob-primary-ico:hover {
+  background: #f8fafc;
+}
+
+.guest-mob-primary-ico:active {
+  transform: scale(0.97);
+}
+
+.guest-mob-primary-ico--phone {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.guest-mob-primary-ico--copy {
+  color: #334155;
+}
+
+.guest-mob-primary-ico--del {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fff;
+}
+
+.guest-mob-primary-ico--del:hover {
+  background: #fee2e2;
+}
+
+.guest-mob-primary-ico-svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.guest-mob-primary-ico-wa {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-mob-primary-ico-wa .guest-send-wa-wrap {
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+.guest-mob-primary-ico-wa .guest-send-wa-btn--mob {
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  padding: 0;
+  gap: 0;
+  font-size: 0;
+  line-height: 0;
+  border-radius: 10px;
+}
+
+.guest-mob-primary-ico-wa .guest-send-wa-btn--mob .guest-send-wa-btn__ico {
+  width: 17px;
+  height: 17px;
+}
+
+.guest-mob-primary-ico-wa .guest-send-wa-btn--mob .guest-send-wa-btn__spin,
+.guest-mob-primary-ico-wa .guest-send-wa-btn--mob .guest-send-wa-btn__mark {
+  width: 17px;
+  height: 17px;
+  font-size: 1rem;
+}
+
+.guest-mob-card--compact {
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+}
+
+.guest-manage-page .guest-mob-list {
+  gap: 0.65rem;
+}
+
+.guest-manage-page .guest-mob-compact__num {
+  display: none;
+}
+
+
+.guest-add-cta {
+  min-height: 44px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgb(37 99 235 / 22%);
+}
+
+@media (max-width: 699px) {
+  .guest-manage-page .guest-add-form--one-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .guest-manage-page .guest-add-form--one-row .guest-add-field,
+  .guest-manage-page .guest-add-form--one-row .guest-add-field--price {
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  .guest-manage-page .guest-add-form__btn-wrap {
+    width: 100%;
+    justify-content: stretch;
+    margin-top: 0.25rem;
+  }
+
+  .guest-manage-page .guest-add-form__btn-wrap .btn {
+    width: 100%;
+  }
+}

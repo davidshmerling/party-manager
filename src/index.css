@@ -1,0 +1,19 @@
+/**
+ * סגנונות גלובליים — מפוצל לקבצים תחת styles/partials/
+ * הסדר חשוב (cascade).
+ */
+@import './styles/partials/01-root-layout-party.css';
+@import './styles/partials/02-page-width-shell.css';
+@import './styles/partials/03-guest-desk-core.css';
+@import './styles/partials/04-guest-stepper-toggles-sub.css';
+@import './styles/partials/05-guest-filters-add-list.css';
+@import './styles/partials/15-guest-manage-modern.css';
+@import './styles/partials/06-event-finance.css';
+@import './styles/partials/07-guest-sort-sheet-mobile-intro.css';
+@import './styles/partials/08-forms-buttons-sheet-base.css';
+@import './styles/partials/09-sheet-rows-modals-python-snippet.css';
+@import './styles/partials/10-terminal-python-textareas.css';
+@import './styles/partials/11-scan-toolbar-page.css';
+@import './styles/partials/12-public-guest-card-carousel.css';
+@import './styles/partials/13-phone-preview-admin.css';
+@import './styles/partials/14-wa-preview-toast-logs.css';

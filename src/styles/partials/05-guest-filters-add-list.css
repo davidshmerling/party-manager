@@ -1,0 +1,280 @@
+/* רשימת אורחים — כרטיס פילטרים (מיושר לימין, קומפקטי) */
+.guest-filters-align {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.guest-filters-card {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: clamp(14px, 2.5vw, 18px);
+  background: #fff;
+  border: 1px solid rgb(226 232 240 / 95%);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 5%),
+    0 8px 24px rgb(15 23 42 / 6%);
+}
+
+.guest-filters-search-form {
+  margin: 0 0 0.5rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.guest-filters-search-joined {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.guest-filters-search-joined:focus-within {
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1px #94a3b8,
+    0 0 0 2px rgb(100 116 139 / 14%);
+}
+
+.guest-filters-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 2.05rem !important;
+  height: 2.05rem;
+  margin: 0 !important;
+  padding: 0.3rem 0.6rem !important;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.guest-filters-search-input:focus {
+  outline: none;
+}
+
+.guest-filters-search-submit {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.25rem;
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f9fafb;
+  background: linear-gradient(180deg, #787f8a 0%, #6b7280 100%);
+  border: none;
+  border-inline-start: 1px solid rgb(55 65 81 / 28%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-filters-search-submit:hover:not(:disabled) {
+  background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
+}
+
+.guest-filters-search-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guest-filters-card__grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.5rem 0.65rem;
+}
+
+.guest-filters-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.guest-filters-field__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.01em;
+}
+
+.guest-filters-control-select {
+  width: 100%;
+  min-height: 1.9rem !important;
+  height: 1.9rem;
+  margin: 0 !important;
+  padding: 0.12rem 0.4rem !important;
+  font-size: 0.82rem;
+  border-radius: 7px;
+  border-color: #e2e8f0;
+  background: #fff;
+}
+
+.guest-filters-field--wa {
+  gap: 0.2rem;
+}
+
+.guest-filters-tag-caption {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #5b6470;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.guest-filters-wa-btn {
+  width: 100%;
+  min-height: 1.9rem !important;
+  margin: 0;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #4b5563;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d4d4d8;
+  border-radius: 7px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guest-filters-wa-btn:hover:not(:disabled) {
+  background: #fafafa;
+  border-color: #a1a1aa;
+  color: #3f3f46;
+}
+
+.guest-filters-wa-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guest-filters-wa-btn--on {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #93c5fd;
+  font-weight: 700;
+}
+
+.guest-sort-seg--filters {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 7px;
+  border-color: #e2e8f0;
+}
+
+.guest-filters-card .guest-sort-seg--filters .guest-sort-seg__btn {
+  padding: 0.22rem 0.35rem;
+  font-size: 0.76rem;
+  min-height: 1.9rem;
+}
+
+.guest-list-below-filters {
+  margin-top: 0.15rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 699px) {
+  .guest-filters-card__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .guest-filters-field--wa {
+    grid-column: 1 / -1;
+  }
+
+  .guest-sort-seg--filters {
+    max-width: none;
+  }
+}
+
+.guest-filter-actions {
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+/* כפתורי מסנן משניים */
+.btn.btn-filter-weak,
+.btn-mob.btn-filter-weak {
+  font-weight: 500;
+  background: #fff;
+  color: #71717a;
+  border: 1px solid #d4d4d8;
+  box-shadow: none;
+}
+
+.btn.btn-filter-weak.is-on,
+.btn-mob.btn-filter-weak.is-on {
+  background: #f4f4f5;
+  color: #3f3f46;
+  border-color: #a1a1aa;
+  font-weight: 600;
+}
+
+.guest-add-section {
+  margin-bottom: 0.65rem;
+}
+
+/* הוספת אורח — שם · מספר · למי · כמה (שורה אחת כשיש מספיק רוחב) */
+.guest-add-form--one-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.55rem 0.75rem;
+}
+
+.guest-add-form--one-row .guest-add-field {
+  flex: 1 1 8.5rem;
+  min-width: 0;
+  max-width: 16rem;
+}
+
+.guest-add-form--one-row .guest-add-field__manual {
+  margin-top: 0.35rem;
+  width: 100%;
+  max-width: none;
+}
+
+.guest-add-form--one-row .guest-add-field--price {
+  flex: 0 0 4.8rem;
+  max-width: 6.5rem;
+}
+
+.guest-add-form--one-row .guest-add-form__btn-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+.guest-list-section {
+  margin-top: 0.25rem;
+}
+
