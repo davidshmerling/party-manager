@@ -2,6 +2,7 @@
  * לוגיקת שליחת הזמנת WhatsApp דרך Twilio + עדכון DB — משותף ל־send-whatsapp ול־whatsapp-send-queue-worker.
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
+import { normalizePhoneForWa } from './formatIsraelMobileE164.ts'
 
 export class TwilioInviteError extends Error {
   constructor(
@@ -35,14 +36,6 @@ export function twilioTemplateMeetsApprovalGate(
   if (/\breject|\bfail/.test(st)) return false
   if (/\bpaused\b/.test(st)) return false
   return /\bapproved\b/.test(st)
-}
-
-export function normalizePhoneForWa(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.length === 10 && digits.startsWith('05')) return `972${digits.slice(1)}`
-  if (digits.length === 9 && digits.startsWith('5')) return `972${digits}`
-  return digits
 }
 
 function formatWhatsAppInviteLink(cardUrls: string[]): string {

@@ -28,6 +28,8 @@ export async function bulkImportGuests(body: {
     ok: Boolean(d.ok),
     added: d.added,
     skipped: typeof d.skipped === 'number' ? d.skipped : 0,
+    skippedInvalidPhone:
+      typeof d.skippedInvalidPhone === 'number' ? d.skippedInvalidPhone : 0,
     queuedForWhatsapp: typeof d.queuedForWhatsapp === 'number' ? d.queuedForWhatsapp : 0,
     errors: Array.isArray(d.errors) ? (d.errors as string[]) : [],
     createdGuests: (rawGuests as Record<string, unknown>[]).map((r) => mapGuestRow(r)),

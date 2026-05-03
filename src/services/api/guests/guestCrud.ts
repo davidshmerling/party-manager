@@ -1,6 +1,7 @@
 import type { EventFinanceLine, IncomeRecipientKind } from '../../../types/finance'
 import type { Guest } from '../../../types/guest'
 import { generateUniqueCode } from '../../../utils/codeGenerator'
+import { formatIsraelMobileE164 } from '../../../utils/formatIsraelMobileE164'
 import { guestIdentityKey } from '../../../utils/guestIdentity'
 import { mapGuestRow } from '../mappers'
 import { sb, errMsg } from '../client'
@@ -47,6 +48,9 @@ export async function createGuest(
 ): Promise<CreateGuestResult> {
   const n = name.trim()
   const p = phone.trim()
+  if (formatIsraelMobileE164(p) === null) {
+    throw new Error('מספר טלפון לא תקין')
+  }
   const client = sb()
   const siblingBundle = await lookupInviteBundleForNewCard(eventId, n, p)
   const wasFirstIdentityTicket = siblingBundle == null

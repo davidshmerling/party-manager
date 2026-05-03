@@ -4,9 +4,8 @@
  * Authorization: Bearer <JWT>
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
-import {
-  twilioTemplateMeetsApprovalGate,
-} from '../_shared/twilioInviteSend.ts'
+import { formatIsraelMobileE164 } from '../_shared/formatIsraelMobileE164.ts'
+import { twilioTemplateMeetsApprovalGate } from '../_shared/twilioInviteSend.ts'
 
 const GUEST_SELECT =
   'id, event_id, name, phone, source, unique_code, invite_bundle_code, status, entered_at, card_opened_at, whatsapp_invite_sent_at, invite_sent_method, whatsapp_last_inbound_at, whatsapp_invite_twilio_sid, whatsapp_invite_twilio_status, created_at, updated_at'
@@ -26,21 +25,6 @@ function json(body: unknown, status: number): Response {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
-}
-
-function formatIsraelMobileE164(phone: string): string | null {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return null
-  if (digits.length === 12 && digits.startsWith('972') && digits[3] === '5') {
-    return `+${digits}`
-  }
-  if (digits.length === 10 && digits.startsWith('05')) {
-    return `+972${digits.slice(1)}`
-  }
-  if (digits.length === 9 && digits.startsWith('5')) {
-    return `+972${digits}`
-  }
-  return null
 }
 
 type ParsedLine = { name: string; phone: string; adminToken: string; amount: number }
@@ -247,6 +231,7 @@ Deno.serve(async (req: Request) => {
   const rawLines = text.split(/\r?\n/)
   const errors: string[] = []
   let skipped = 0
+  let skippedInvalidPhone = 0
   const seenNormLine = new Set<string>()
   type WorkRow = { displayNum: number; parsed: ParsedLine; linePreview: string }
   const work: WorkRow[] = []
@@ -297,6 +282,10 @@ Deno.serve(async (req: Request) => {
       )
       continue
     }
+    if (formatIsraelMobileE164(parsed.phone) === null) {
+      skippedInvalidPhone += 1
+      continue
+    }
     work.push({ displayNum: displayLineNum, parsed, linePreview: shortLinePreview(raw) })
   }
 
@@ -305,6 +294,7 @@ Deno.serve(async (req: Request) => {
       ok: false as const,
       added: 0,
       skipped,
+      skippedInvalidPhone,
       queuedForWhatsapp: 0,
       errors,
       createdGuests: [],
@@ -317,6 +307,7 @@ Deno.serve(async (req: Request) => {
       ok: true as const,
       added: 0,
       skipped,
+      skippedInvalidPhone,
       queuedForWhatsapp: 0,
       errors: [],
       createdGuests: [],
@@ -416,7 +407,6 @@ Deno.serve(async (req: Request) => {
       if (
         wasFirstIdentityTicket &&
         templateApproved &&
-        formatIsraelMobileE164(p.trim()) != null &&
         String(guest.source ?? 'list') !== 'pay_at_door'
       ) {
         queueGuestIds.push(guestId)
@@ -456,6 +446,7 @@ Deno.serve(async (req: Request) => {
     ok: errors.length === 0,
     added,
     skipped,
+    skippedInvalidPhone,
     queuedForWhatsapp,
     errors,
     createdGuests,

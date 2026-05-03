@@ -120,6 +120,7 @@ export function GuestListPage() {
                   incomeRecipientEditOptions={m.incomeRecipientEditOptions}
                   saveIncomeAmountForMembers={m.saveIncomeAmountForMembers}
                   saveIncomeRecipientForMembers={m.saveIncomeRecipientForMembers}
+                  isPartner={m.isPartner}
                 />
                 <div className="guest-manage-card guest-manage-table-card">
                   <GuestListDesktopTableSection
@@ -141,6 +142,7 @@ export function GuestListPage() {
                     incomeRecipientEditOptions={m.incomeRecipientEditOptions}
                     saveIncomeAmountForMembers={m.saveIncomeAmountForMembers}
                     saveIncomeRecipientForMembers={m.saveIncomeRecipientForMembers}
+                    isPartner={m.isPartner}
                   />
                 </div>
               </>

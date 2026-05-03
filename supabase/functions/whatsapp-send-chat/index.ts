@@ -5,6 +5,7 @@
  * Authorization: Bearer JWT
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
+import { normalizePhoneForWa } from '../_shared/formatIsraelMobileE164.ts'
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -17,14 +18,6 @@ function json(body: unknown, status: number): Response {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
-}
-
-function normalizePhoneForWa(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.length === 10 && digits.startsWith('05')) return `972${digits.slice(1)}`
-  if (digits.length === 9 && digits.startsWith('5')) return `972${digits}`
-  return digits
 }
 
 async function fetchTwilioBalance(accountSid: string, authToken: string): Promise<number | null> {

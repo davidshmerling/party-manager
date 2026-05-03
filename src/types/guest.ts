@@ -69,6 +69,8 @@ export type BulkImportGuestsResult = {
   ok: boolean
   added: number
   skipped: number
+  /** שורות עם מספר שאינו נייד ישראלי תקין — לא נשמרו ב־DB */
+  skippedInvalidPhone: number
   queuedForWhatsapp: number
   errors: string[]
   createdGuests: Guest[]

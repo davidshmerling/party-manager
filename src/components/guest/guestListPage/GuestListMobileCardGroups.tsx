@@ -33,6 +33,8 @@ type Props = {
   incomeRecipientEditOptions: IncomeRecipientEditOption[]
   saveIncomeAmountForMembers: (members: Guest[], amount: number) => void | Promise<void>
   saveIncomeRecipientForMembers: (members: Guest[], recipientValue: string) => void | Promise<void>
+  /** ‎profile.role === 'partner' — כרטיסים + סימון הזמנה ידני במצב «נצפה» */
+  isPartner: boolean
 }
 
 export function GuestListMobileCardGroups({
@@ -56,6 +58,7 @@ export function GuestListMobileCardGroups({
   incomeRecipientEditOptions,
   saveIncomeAmountForMembers,
   saveIncomeRecipientForMembers,
+  isPartner,
 }: Props) {
   return (
     <div className="guest-mob-list guest-list--mobile-only">
@@ -79,9 +82,12 @@ export function GuestListMobileCardGroups({
             twilioSendingGuestId={twilioSendingGuestId}
             onCardPress={onCardPress}
             onStatusCommitted={onStatusCommitted}
-            onAddTicket={() => void handleAddTicket(members)}
-            onRemoveOneTicket={members.length > 1 ? () => void handleRemoveOneTicket(members) : undefined}
+            onAddTicket={isPartner ? () => void handleAddTicket(members) : undefined}
+            onRemoveOneTicket={
+              isPartner && members.length > 1 ? () => void handleRemoveOneTicket(members) : undefined
+            }
             ticketActionPending={ticketActionKey === gk}
+            isPartner={isPartner}
             incomeLineIds={inc.ids}
             incomeAmount={inc.amount}
             incomeRecipientLabel={inc.recipientLabel}
@@ -117,6 +123,7 @@ export function GuestListMobileCardGroups({
             twilioSendingGuestId={twilioSendingGuestId}
             onCardPress={onCardPress}
             onStatusCommitted={onStatusCommitted}
+            isPartner={isPartner}
             incomeLineIds={inc.ids}
             incomeAmount={inc.amount}
             incomeRecipientLabel={inc.recipientLabel}

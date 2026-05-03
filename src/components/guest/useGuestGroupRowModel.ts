@@ -3,6 +3,20 @@ import type { Guest, GuestStatus } from '../../types/guest'
 import { updateGuest } from '../../services/api'
 import type { IncomeRecipientEditOption } from './IncomeRecipientSelect'
 
+/** בעת סימון «נשלח» ידני — שומרים SID/סטטוס טוויליו כדי ש־read / delivered ימשיכו לשקף את ה־UI (כחול אם נקרא / נפתח כרטיס) */
+function twilioInviteSnapshotForManualSent(m: Guest): {
+  whatsapp_invite_twilio_sid: string | null
+  whatsapp_invite_twilio_status: string | null
+} {
+  const sidRaw = m.whatsapp_invite_twilio_sid
+  const sid =
+    sidRaw != null && String(sidRaw).trim() !== '' ? String(sidRaw).trim() : null
+  const stRaw = m.whatsapp_invite_twilio_status
+  const st =
+    stRaw != null && String(stRaw).trim() !== '' ? String(stRaw).trim().toLowerCase() : null
+  return { whatsapp_invite_twilio_sid: sid, whatsapp_invite_twilio_status: st }
+}
+
 export type GuestGroupRowProps = {
   rowNum: number
   /** 0/1 לפסי זברה בטבלה (דסקטופ) */
@@ -24,10 +38,12 @@ export type GuestGroupRowProps = {
   twilioSendingGuestId?: string | null
   onCardPress: (key: string) => void
   onStatusCommitted?: (kind: 'entered' | 'pending' | 'partial', name: string) => void
-  /** הוספת כרטיס לאותה זהות (שם+טלפון) — לא רלוונטי לתשלום בכניסה */
+  /** הוספת כרטיס לאותה זהות (שם+טלפון) — לא רלוונטי לתשלום בכניסה; רק ‎`profile.role === 'partner'` */
   onAddTicket?: () => void | Promise<void>
   /** הסרת כרטיס אחד (נשארים ≥1) */
   onRemoveOneTicket?: () => void | Promise<void>
+  /** שותף — כרטיסים + סימון הזמנה ידני (לא במצב mixed) */
+  isPartner?: boolean
   /** בזמן בקשת רשת */
   ticketActionPending?: boolean
   /** שורת/ות הכנסה (אורח מהרשימה) — עריכת מחיר */
@@ -123,25 +139,29 @@ export function useGuestGroupRowModel({
       const ts = value === 'sent' ? new Date().toISOString() : null
       const now = new Date().toISOString()
       const previous = members
-      const optimistic: Guest[] = members.map((m) => ({
-        ...m,
-        whatsapp_invite_sent_at: ts,
-        invite_sent_method: ts ? 'manual_admin' : null,
-        whatsapp_invite_twilio_sid: null,
-        whatsapp_invite_twilio_status: null,
-        updated_at: now,
-      }))
+      const optimistic: Guest[] = members.map((m) => {
+        const tw = ts ? twilioInviteSnapshotForManualSent(m) : { whatsapp_invite_twilio_sid: null, whatsapp_invite_twilio_status: null }
+        return {
+          ...m,
+          whatsapp_invite_sent_at: ts,
+          invite_sent_method: ts ? 'manual_admin' : null,
+          whatsapp_invite_twilio_sid: tw.whatsapp_invite_twilio_sid,
+          whatsapp_invite_twilio_status: tw.whatsapp_invite_twilio_status,
+          updated_at: now,
+        }
+      })
       await onChange(optimistic)
       try {
         const out = await Promise.all(
-          members.map((m) =>
-            updateGuest(m.id, {
+          members.map((m) => {
+            const tw = ts ? twilioInviteSnapshotForManualSent(m) : { whatsapp_invite_twilio_sid: null, whatsapp_invite_twilio_status: null }
+            return updateGuest(m.id, {
               whatsapp_invite_sent_at: ts,
               invite_sent_method: ts ? 'manual_admin' : null,
-              whatsapp_invite_twilio_sid: null,
-              whatsapp_invite_twilio_status: null,
-            }),
-          ),
+              whatsapp_invite_twilio_sid: tw.whatsapp_invite_twilio_sid,
+              whatsapp_invite_twilio_status: tw.whatsapp_invite_twilio_status,
+            })
+          }),
         )
         await onChange(out)
       } catch (e) {

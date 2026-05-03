@@ -31,6 +31,7 @@ type Props = {
   incomeRecipientEditOptions: IncomeRecipientEditOption[]
   saveIncomeAmountForMembers: (members: Guest[], amount: number) => void | Promise<void>
   saveIncomeRecipientForMembers: (members: Guest[], recipientValue: string) => void | Promise<void>
+  isPartner: boolean
 }
 
 const TABLE_COLS = 8
@@ -54,6 +55,7 @@ export function GuestListDesktopTableSection({
   incomeRecipientEditOptions,
   saveIncomeAmountForMembers,
   saveIncomeRecipientForMembers,
+  isPartner,
 }: Props) {
   return (
     <div className="guest-desk guest-list--desktop-only">
@@ -89,14 +91,14 @@ export function GuestListDesktopTableSection({
               <th
                 scope="col"
                 className="guest-desk-th guest-desk-th--entry-mark guest-desk-th--tag"
-                title="סימון ידני: האם האורח נכנס לפארטי"
+                title="תצוגת סטטוס בלבד — עדכון כניסה רק דרך סריקת QR בכניסה"
               >
                 כניסה
               </th>
               <th
                 scope="col"
                 className="guest-desk-th guest-desk-th--invite-mark guest-desk-th--tag"
-                title="סימון ידני: האם הזמנת WhatsApp נשלחה (מסתנכרן מהמסד)"
+                title="שינוי ידני — שותף בלבד (לא במצב מעורב). מ«לא נשלח» ל«נשלח» אפור; כחול אם טוויליו read או כרטיס נפתח"
               >
                 הזמנה
               </th>
@@ -126,11 +128,12 @@ export function GuestListDesktopTableSection({
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}
-                  onAddTicket={() => void handleAddTicket(members)}
+                  onAddTicket={isPartner ? () => void handleAddTicket(members) : undefined}
                   onRemoveOneTicket={
-                    members.length > 1 ? () => void handleRemoveOneTicket(members) : undefined
+                    isPartner && members.length > 1 ? () => void handleRemoveOneTicket(members) : undefined
                   }
                   ticketActionPending={ticketActionKey === gk}
+                  isPartner={isPartner}
                   incomeLineIds={inc.ids}
                   incomeAmount={inc.amount}
                   incomeRecipientLabel={inc.recipientLabel}
@@ -173,6 +176,7 @@ export function GuestListDesktopTableSection({
                   twilioTemplateApproved={twilioTemplateApproved}
                   twilioSendingGuestId={twilioSendingGuestId}
                   onCardPress={onCardPress}
+                  isPartner={isPartner}
                   incomeLineIds={inc.ids}
                   incomeAmount={inc.amount}
                   incomeRecipientLabel={inc.recipientLabel}

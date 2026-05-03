@@ -611,6 +611,27 @@ main.main:has(.guest-manage-page) {
   font-size: 0.72rem;
 }
 
+.guest-manage-page .guest-mob-input--field-error {
+  border-color: var(--color-danger, #dc2626);
+  box-shadow: 0 0 0 1px rgb(220 38 38 / 25%);
+}
+
+/* כניסה: תצוגה בלבד — עדכון רק בסריקה */
+.guest-manage-page .guest-entry-seg--readonly {
+  opacity: 0.72;
+}
+
+.guest-manage-page .guest-invite-seg--manual-locked {
+  opacity: 0.72;
+}
+
+.guest-manage-page .guest-add-field__error {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--color-danger, #dc2626);
+}
+
 .guest-add-cta {
   min-height: 44px;
   font-weight: 800;

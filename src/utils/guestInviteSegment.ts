@@ -18,8 +18,8 @@ export function isGuestDbNotSent(m: Guest): boolean {
 /**
  * שלושת מצבי ה-segment:
  * not_sent — אין אינדיקציה לשליחה
- * seen — נפתח כרטיס או Twilio read
- * sent — נשלח (wa / Twilio) ועדיין לא נקרא/נפתח
+ * sent — נשלח; כולל סטטוסי Twilio לפני «נקרא» (למשל queued, sent, delivered) — ✓✓ אפור בעמודת «נשלח»
+ * seen — Twilio ‎`read`‎ (נקרא בווטסאפ) או נפתח כרטיס — ✓✓ כחול בעמודת «נצפה»
  */
 export function memberInviteSegment(m: Guest): InviteSegmentVisual {
   if (isGuestDbNotSent(m)) return 'not_sent'
@@ -47,4 +47,9 @@ export function groupInviteThumbSegment(
   const ms = members.map(memberInviteSegment)
   if (ms.some((x) => x === 'not_sent')) return 'not_sent'
   return 'sent'
+}
+
+/** שינוי ידני של סגמנט ההזמנה (שותף) — לא כשהכרטיסים במצבים מעורבים */
+export function partnerInviteManualEditAllowed(members: Guest[]): boolean {
+  return groupInviteSegment(members) !== 'mixed'
 }

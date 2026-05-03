@@ -12,6 +12,11 @@ export function publicImageBrand(file: string): string {
   return publicAssetUrl(`/images/brand/${f}`)
 }
 
+/** לוגו / אייקון אפליקציה ברירת־מחדל — ‎`public/image.png` */
+export function publicAppIcon(): string {
+  return publicAssetUrl('image.png')
+}
+
 /**
  * כש־URL נכשל, מסתירים את התמונה כדי שה־gradient של המעטפת יישאר נקי בלי אייקון תמונה שבורה.
  */

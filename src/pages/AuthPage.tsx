@@ -20,7 +20,7 @@ import {
   LANDING_UPCOMING_PARTIES_URL,
   STAFF_HOME_PATH,
 } from '../constants/appRoutes'
-import { publicImageBrand, hideBrokenPublicImage } from '../lib/publicAssetUrl'
+import { publicAppIcon, hideBrokenPublicImage } from '../lib/publicAssetUrl'
 import { useDebugPublicImageSrc } from '../hooks/useDebugPublicImageSrc'
 import { useResolvedSiteMarketing } from '../hooks/useSiteMarketingAssets'
 
@@ -45,7 +45,7 @@ function treatAsFreshLoginEntry(fromPath: string): boolean {
 function AuthLoginOnlyBrandMark() {
   const marketing = useResolvedSiteMarketing()
   const logoUrl = useMemo(
-    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicImageBrand('logo.svg')),
+    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicAppIcon()),
     [marketing?.iconUrl],
   )
   useDebugPublicImageSrc('AuthPage /login header logo', logoUrl)

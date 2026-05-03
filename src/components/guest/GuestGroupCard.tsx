@@ -5,6 +5,7 @@ import { GuestEntryMarkButton } from './GuestEntryMarkButton'
 import { GuestInviteSentMarkButton } from './GuestInviteSentMarkButton'
 import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
+import { partnerInviteManualEditAllowed } from '../../utils/guestInviteSegment'
 
 export type { GuestGroupRowProps as GuestGroupCardProps }
 
@@ -49,6 +50,7 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     incomeRecipientEditOptions = [],
     onSaveIncomeAmount,
     onSaveIncomeRecipient,
+    isPartner = false,
   } = props
 
   const payAtDoor = props.members[0]!.source === 'pay_at_door'
@@ -73,6 +75,8 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
     saveInviteSent,
     saveStatus,
   } = useGuestGroupRowModel(props)
+
+  const inviteManualAllowed = Boolean(isPartner && partnerInviteManualEditAllowed(members))
 
   return (
     <article
@@ -195,13 +199,15 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
               void onCopyWaMessage(rep.id)
             }}
           >
-            <span className="guest-mob-primary-ico-emoji" aria-hidden>
-              💬
-            </span>
             <MobPrimarySvgChat />
           </button>
           <GuestEntryMarkButton variant="mob" members={members} saveStatus={saveStatus} />
-          <GuestInviteSentMarkButton variant="mob" members={members} saveInviteSent={saveInviteSent} />
+          <GuestInviteSentMarkButton
+            variant="mob"
+            members={members}
+            saveInviteSent={saveInviteSent}
+            allowManualToggle={inviteManualAllowed}
+          />
           {onSendTwilio ? (
             <GuestWhatsAppUnifiedControl
               guestId={rep.id}

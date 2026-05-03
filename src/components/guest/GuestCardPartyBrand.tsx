@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { SITE_PARTY_BRAND } from '../../config/sitePartyBrand'
-import { publicImageBrand, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
+import { publicAppIcon, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
 import { useResolvedSiteMarketing } from '../../hooks/useSiteMarketingAssets'
 
 /** סמל המקום + שורות — מעל כרטיס ה־QR או בראש דף ההתחברות */
 export function GuestCardPartyBrand({ variant = 'ticket' }: { variant?: 'ticket' | 'login' }) {
   const marketing = useResolvedSiteMarketing()
   const logoUrl = useMemo(
-    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicImageBrand('logo.svg')),
+    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicAppIcon()),
     [marketing?.iconUrl],
   )
 

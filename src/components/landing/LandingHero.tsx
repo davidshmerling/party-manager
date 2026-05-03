@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { SITE_PARTY_BRAND } from '../../config/sitePartyBrand'
-import { publicImageBrand, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
+import { publicAppIcon, publicImageBrand, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
 import { useDebugPublicImageSrc } from '../../hooks/useDebugPublicImageSrc'
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
   onPrimaryCtaClick: () => void
   /** רקע hero — URL מלא מ־Supabase; בלי — SVG מקומי */
   heroImageUrl?: string | null
-  /** לוגו/אייקון — URL מלא; בלי — SVG מקומי */
+  /** לוגו/אייקון — URL מלא; בלי — ‎`public/image.png` */
   logoImageUrl?: string | null
 }
 
@@ -18,7 +18,7 @@ export function LandingHero({ onPrimaryCtaClick, heroImageUrl, logoImageUrl }: P
     [heroImageUrl],
   )
   const logoUrl = useMemo(
-    () => (logoImageUrl?.trim() ? logoImageUrl.trim() : publicImageBrand('logo.svg')),
+    () => (logoImageUrl?.trim() ? logoImageUrl.trim() : publicAppIcon()),
     [logoImageUrl],
   )
   useDebugPublicImageSrc('LandingHero background (CSS)', bgUrl)

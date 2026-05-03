@@ -25,22 +25,25 @@ function segmentTitle(groupSeg: EntrySegmentGroup, members: Guest[]): string {
   if (groupSeg === 'mixed') {
     const p = members.filter((m) => m.status === 'pending').length
     const e = members.filter((m) => m.status === 'entered').length
-    return `מעורב: לא נכנס ${p}, נכנס ${e} — לחץ לעדכן סטטוס כניסה`
+    return `מעורב: לא נכנס ${p}, נכנס ${e} — עדכון כניסה רק דרך סריקה`
   }
-  if (groupSeg === 'pending') return 'לא נכנס — לחץ ✓ לסמן נכנס'
-  return 'נכנס — לחץ ✗ לסמן לא נכנס'
+  if (groupSeg === 'pending') return 'לא נכנס — עדכון רק דרך סריקת QR בכניסה'
+  return 'נכנס — עדכון רק דרך סריקה (אין ביטול ידני)'
 }
 
 export type GuestEntryMarkButtonProps = {
   variant: 'mob' | 'desk-col'
   members: Guest[]
   saveStatus: (next: GuestStatus) => Promise<void>
+  /** כש־true (ברירת מחדל) — אין שינוי ידני; כניסה מתעדכנת רק בסריקה */
+  readOnly?: boolean
 }
 
 export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
   variant,
   members,
   saveStatus,
+  readOnly = true,
 }: GuestEntryMarkButtonProps) {
   const [busy, setBusy] = useState(false)
 
@@ -55,7 +58,7 @@ export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
 
   async function markPending(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
-    if (busy || !someEntered) return
+    if (readOnly || busy || !someEntered) return
     setBusy(true)
     try {
       await saveStatus('pending')
@@ -66,7 +69,7 @@ export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
 
   async function markEntered(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
-    if (busy || !somePending) return
+    if (readOnly || busy || !somePending) return
     setBusy(true)
     try {
       await saveStatus('entered')
@@ -82,7 +85,7 @@ export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
 
   return (
     <div
-      className={`${rootClass} guest-entry-seg--thumb-${thumbSeg}${groupSeg === 'mixed' ? ' guest-entry-seg--mixed' : ''}${busy ? ' guest-entry-seg--busy' : ''}`}
+      className={`${rootClass} guest-entry-seg--thumb-${thumbSeg}${groupSeg === 'mixed' ? ' guest-entry-seg--mixed' : ''}${busy ? ' guest-entry-seg--busy' : ''}${readOnly ? ' guest-entry-seg--readonly' : ''}`}
       style={{ '--thumb': idx } as CSSProperties}
       role="group"
       title={title}
@@ -93,7 +96,7 @@ export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
         <button
           type="button"
           className="guest-entry-seg__cell guest-entry-seg__cell--tap"
-          disabled={busy || !someEntered}
+          disabled={readOnly || busy || !someEntered}
           aria-label="סמן לא נכנס"
           onClick={(e) => void markPending(e)}
         >
@@ -104,7 +107,7 @@ export const GuestEntryMarkButton = memo(function GuestEntryMarkButton({
         <button
           type="button"
           className="guest-entry-seg__cell guest-entry-seg__cell--tap"
-          disabled={busy || !somePending}
+          disabled={readOnly || busy || !somePending}
           aria-label="סמן נכנס"
           onClick={(e) => void markEntered(e)}
         >

@@ -1,4 +1,5 @@
 import type { AdminUserRow } from '../../../types/admin'
+import { formatIsraelMobileE164 } from '../../../utils/formatIsraelMobileE164'
 
 const RECIPIENT_PAYBOX = '__paybox__' as const
 
@@ -43,6 +44,9 @@ export function GuestListAddGuestSection({
   const canSubmitRecipient = Boolean(
     canPickRecipient && newGuestRecipient,
   )
+  const phoneE164 = formatIsraelMobileE164(newPhone)
+  const phoneShowError = newPhone.trim() !== '' && phoneE164 === null
+  const phoneBlocksSubmit = phoneE164 === null
   return (
     <section className="guest-add-section" id="guest-add-panel" aria-labelledby="guest-add-heading">
       <div className="guest-add-surface">
@@ -63,13 +67,21 @@ export function GuestListAddGuestSection({
           <div className="guest-add-field">
             <span className="guest-mob-label">מספר</span>
             <input
-              className="guest-mob-input"
+              className={`guest-mob-input${phoneShowError ? ' guest-mob-input--field-error' : ''}`}
               placeholder="טלפון"
               inputMode="tel"
+              autoComplete="tel"
               value={newPhone}
               onChange={(e) => setNewPhone(e.target.value)}
               disabled={listDisabled}
+              aria-invalid={phoneShowError}
+              aria-describedby={phoneShowError ? 'guest-add-phone-error' : undefined}
             />
+            {phoneShowError ? (
+              <p id="guest-add-phone-error" className="guest-add-field__error" role="alert">
+                נייד ישראלי בלבד (05… / 9725…)
+              </p>
+            ) : null}
           </div>
           <div className="guest-add-field">
             <span className="guest-mob-label">מקבל תשלום</span>
@@ -127,7 +139,7 @@ export function GuestListAddGuestSection({
             <button
               type="button"
               className="btn btn-mob btn-mob--primary guest-add-mob__btn guest-add-mob__btn--primary guest-add-cta"
-              disabled={listDisabled || !canSubmitRecipient}
+              disabled={listDisabled || !canSubmitRecipient || phoneBlocksSubmit}
               onClick={() => void onAdd()}
             >
               הוסף אורח

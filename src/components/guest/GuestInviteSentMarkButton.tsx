@@ -13,6 +13,11 @@ export type GuestInviteSentMarkButtonProps = {
   variant: 'mob' | 'desk-col'
   members: Guest[]
   saveInviteSent: (value: 'sent' | 'not_sent') => Promise<void>
+  /**
+   * שינוי ידני (✗ / ✓✓ אפור) — מותר לשותף כשאין מצב mixed בקבוצה.
+   * כש־false — הכפתורים חסומים.
+   */
+  allowManualToggle?: boolean
 }
 
 function thumbIndex(seg: InviteSegmentVisual): number {
@@ -21,21 +26,30 @@ function thumbIndex(seg: InviteSegmentVisual): number {
   return 2
 }
 
-function segmentTitle(groupSeg: InviteSegmentGroup, members: Guest[]): string {
+function segmentTitle(
+  groupSeg: InviteSegmentGroup,
+  members: Guest[],
+  allowManual: boolean,
+): string {
+  const perm =
+    'שינוי ידני — שותף בלבד; לא במצב מעורב. אחרי «נשלח»: אם טוויליו read או כרטיס נפתח — כחול אוטומטית.'
   if (groupSeg === 'mixed') {
     const ms = members.map(memberInviteSegment)
     const n = (s: InviteSegmentVisual) => ms.filter((x) => x === s).length
-    return `מעורב: לא נשלח ${n('not_sent')}, נשלח ${n('sent')}, נצפה ${n('seen')} — לחץ ❌ לנקות או ✓✓ אפור לסמן נשלח`
+    return `מעורב: לא נשלח ${n('not_sent')}, נשלח ${n('sent')}, נצפה ${n('seen')}. ${perm}`
   }
-  if (groupSeg === 'not_sent') return 'לא נשלח — לחץ ✓✓ אמצעי לסמן נשלח'
-  if (groupSeg === 'sent') return 'נשלח — לחץ ❌ ל«לא נשלח»; נקרא/נפתח יתעדכן אוטומטית'
-  return 'נפתח או נקרא בווטסאפ — מצב אוטומטי; ❌ או ✓✓ אפור לשינוי שליחה בלבד'
+  if (groupSeg === 'not_sent') return `לא נשלח — ${perm}`
+  if (groupSeg === 'sent') return `נשלח — נקרא/נפתח יתעדכן אוטומטית. ${perm}`
+  return allowManual
+    ? 'נצפה בווטסאפ או נפתח כרטיס — שותף: אפשר לעדכן ידנית ✗ / ✓✓'
+    : `נצפה בווטסאפ או נפתח כרטיס — ${perm}`
 }
 
 export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton({
   variant,
   members,
   saveInviteSent,
+  allowManualToggle = false,
 }: GuestInviteSentMarkButtonProps) {
   const [busy, setBusy] = useState(false)
 
@@ -45,12 +59,12 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
   const someDbNotSent = useMemo(() => members.some(isGuestDbNotSent), [members])
   const someDbSent = useMemo(() => members.some((m) => !isGuestDbNotSent(m)), [members])
 
-  const title = segmentTitle(groupSeg, members)
+  const title = segmentTitle(groupSeg, members, allowManualToggle)
   const idx = thumbIndex(thumbSeg)
 
   async function markNotSent(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
-    if (busy || !someDbSent) return
+    if (busy || !allowManualToggle || !someDbSent) return
     setBusy(true)
     try {
       await saveInviteSent('not_sent')
@@ -61,7 +75,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
 
   async function markSent(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
-    if (busy || !someDbNotSent) return
+    if (busy || !allowManualToggle || !someDbNotSent) return
     setBusy(true)
     try {
       await saveInviteSent('sent')
@@ -77,7 +91,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
 
   return (
     <div
-      className={`${rootClass} guest-invite-seg--thumb-${thumbSeg}${groupSeg === 'mixed' ? ' guest-invite-seg--mixed' : ''}${busy ? ' guest-invite-seg--busy' : ''}`}
+      className={`${rootClass} guest-invite-seg--thumb-${thumbSeg}${groupSeg === 'mixed' ? ' guest-invite-seg--mixed' : ''}${busy ? ' guest-invite-seg--busy' : ''}${!allowManualToggle ? ' guest-invite-seg--manual-locked' : ''}`}
       style={{ '--thumb': idx } as CSSProperties}
       role="group"
       title={title}
@@ -88,7 +102,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
         <button
           type="button"
           className="guest-invite-seg__cell guest-invite-seg__cell--tap"
-          disabled={busy || !someDbSent}
+          disabled={busy || !allowManualToggle || !someDbSent}
           aria-label="סמן לא נשלח"
           onClick={(e) => void markNotSent(e)}
         >
@@ -99,7 +113,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
         <button
           type="button"
           className="guest-invite-seg__cell guest-invite-seg__cell--tap"
-          disabled={busy || !someDbNotSent}
+          disabled={busy || !allowManualToggle || !someDbNotSent}
           aria-label="סמן נשלח (ידני)"
           onClick={(e) => void markSent(e)}
         >

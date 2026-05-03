@@ -5,6 +5,7 @@ import { GuestEntryMarkButton } from './GuestEntryMarkButton'
 import { GuestInviteSentMarkButton } from './GuestInviteSentMarkButton'
 import { GuestWhatsAppUnifiedControl } from './GuestWhatsAppUnifiedControl'
 import { useGuestGroupRowModel, type GuestGroupRowProps } from './useGuestGroupRowModel'
+import { partnerInviteManualEditAllowed } from '../../utils/guestInviteSegment'
 
 function DeskIcoChat() {
   return (
@@ -66,6 +67,7 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     incomeRecipientEditOptions = [],
     onSaveIncomeAmount,
     onSaveIncomeRecipient,
+    isPartner = false,
   } = props
 
   const {
@@ -79,6 +81,8 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
     saveInviteSent,
     saveStatus,
   } = useGuestGroupRowModel(props)
+
+  const inviteManualAllowed = Boolean(isPartner && partnerInviteManualEditAllowed(members))
 
   const [priceInput, setPriceInput] = useState('')
   useEffect(() => {
@@ -226,7 +230,12 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
           className="guest-desk-td guest-desk-td--invite-mark guest-desk-td--center"
           onClick={(e) => e.stopPropagation()}
         >
-          <GuestInviteSentMarkButton variant="desk-col" members={members} saveInviteSent={saveInviteSent} />
+          <GuestInviteSentMarkButton
+            variant="desk-col"
+            members={members}
+            saveInviteSent={saveInviteSent}
+            allowManualToggle={inviteManualAllowed}
+          />
         </td>
         <td
           className="guest-desk-td guest-desk-td--actions"
@@ -240,9 +249,6 @@ function GuestGroupTableRowInner(props: GuestGroupRowProps) {
               aria-label="העתק הודעת WhatsApp"
               onClick={() => void onCopyWaMessage(rep.id)}
             >
-              <span className="guest-desk-act__emoji" aria-hidden>
-                💬
-              </span>
               <DeskIcoChat />
             </button>
             {onSendTwilio ? (

@@ -7,7 +7,6 @@ import type { AdminUserRow } from '../types/admin'
 import type { EventStaffRow } from '../types/event'
 import type { EventFinanceLine, IncomeRecipientKind } from '../types/finance'
 import type { Guest } from '../types/guest'
-import type { PartyEventShell } from '../services/api/partyShell'
 import { useAuth } from '../auth/AuthProvider'
 import { useEvent } from '../context/EventContext'
 import {
@@ -15,10 +14,7 @@ import {
   deleteGuestsByIds,
   bulkImportGuests,
   fetchPartyEventShell,
-  fetchTwilioBalanceForEvent,
-  sendGuestWhatsAppViaTwilio,
   sendWhatsApp,
-  syncWhatsAppInviteTemplateStatus,
   updateEventFinanceLine,
 } from '../services/api'
 import { logUserActivity } from '../services/loggingApi'
@@ -32,8 +28,7 @@ import {
 } from '../lib/partyEventQueries'
 import { groupGuestsByIdentity, guestGroupKey, guestIdentityKey } from '../utils/guestIdentity'
 import { findBestGuestGroupMatch, guestRowAnchorId, scoreGuestSearch } from '../utils/guestListSearch'
-import { formatIsraelMobileE164 } from '../utils/whatsapp'
-import { isTwilioWhatsappInviteTemplateApproved } from '../utils/twilioTemplateApproval'
+import { formatIsraelMobileE164 } from '../utils/formatIsraelMobileE164'
 import type { IncomeRecipientEditOption } from '../components/guest/IncomeRecipientSelect'
 import {
   adminLabel,
@@ -42,6 +37,7 @@ import {
   RECIPIENT_SEL_PREFIX,
   sortGuestsLikeFetch,
 } from './guestList/guestListPageHelpers'
+import { useGuestListTwilio } from './useGuestListTwilio'
 
 const EMPTY_GUESTS: Guest[] = []
 const EMPTY_FINANCE: EventFinanceLine[] = []
@@ -50,7 +46,7 @@ const EMPTY_EVENT_STAFF: EventStaffRow[] = []
 
 export function useGuestListPageModel() {
   const { currentEventId, currentEvent, loading: eventLoading, refreshEvents } = useEvent()
-  const { user } = useAuth()
+  const { user, isPartner } = useAuth()
   const queryClient = useQueryClient()
 
   const eventQueryEnabled = Boolean(currentEventId)
@@ -94,7 +90,6 @@ export function useGuestListPageModel() {
   const [pasteMsg, setPasteMsg] = useState<string | null>(null)
   const [pasteErrorLog, setPasteErrorLog] = useState<string[] | null>(null)
   const [listNotice, setListNotice] = useState<string | null>(null)
-  const [twilioSendingGuestId, setTwilioSendingGuestId] = useState<string | null>(null)
   /** מיון קבוצות: שם, זמן כניסה לפארטי, או created_at (הוספה לרשימה) */
   const [guestSortMode, setGuestSortMode] = useState<'name' | 'entry_time' | 'added_at'>('name')
   /** סינון לפי סטטוס שליחת הזמנה בוואטסאפ */
@@ -114,54 +109,6 @@ export function useGuestListPageModel() {
   /** הוספה/הסרה של כרטיס — UI לפי key; ref נגד לחיצה כפולה */
   const [ticketActionKey, setTicketActionKey] = useState<string | null>(null)
   const ticketActionBusyRef = useRef(false)
-
-  const twilioTemplateApproved = useMemo(
-    () => isTwilioWhatsappInviteTemplateApproved(currentEvent),
-    [
-      currentEvent?.id,
-      currentEvent?.whatsapp_twilio_content_sid,
-      currentEvent?.whatsapp_twilio_content_status,
-      currentEvent?.whatsapp_twilio_placeholder_slots?.join(','),
-    ],
-  )
-
-  /** סטטוס שמור במסד שעדיין יכול להתעדכן בטווילו אחרי אישור Meta */
-  const twilioStatusMaybeStale = useMemo(() => {
-    const st = (currentEvent?.whatsapp_twilio_content_status ?? '').trim().toLowerCase()
-    if (!st) return true
-    if (/\breceived\b/.test(st)) return true
-    if (/\bpending\b/.test(st)) return true
-    return false
-  }, [currentEvent?.whatsapp_twilio_content_status])
-
-  useEffect(() => {
-    if (!currentEventId || !currentEvent) return
-    const sid = (currentEvent.whatsapp_twilio_content_sid ?? '').trim()
-    if (!sid.startsWith('HX')) return
-    if (isTwilioWhatsappInviteTemplateApproved(currentEvent)) return
-    if (!twilioStatusMaybeStale) return
-
-    let cancelled = false
-    void (async () => {
-      try {
-        await syncWhatsAppInviteTemplateStatus(currentEventId)
-        if (cancelled) return
-        await queryClient.invalidateQueries({ queryKey: partyQueryKeys.partyShell(currentEventId) })
-        await refreshEvents()
-      } catch {
-        /* Twilio / רשת — נשארים עם הסטטוס המקומי */
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [
-    currentEventId,
-    currentEvent,
-    twilioStatusMaybeStale,
-    refreshEvents,
-    queryClient,
-  ])
 
   const scannerRecipientOptions = useMemo(
     () =>
@@ -324,6 +271,23 @@ export function useGuestListPageModel() {
     },
     [currentEventId, queryClient, guests],
   )
+
+  const {
+    twilioSendingGuestId,
+    twilioTemplateApproved,
+    rowSendTwilio,
+    runTwilioAutoInviteAfterCreateIfEligible,
+  } = useGuestListTwilio({
+    currentEventId,
+    currentEvent,
+    guests,
+    queryClient,
+    refreshEvents,
+    persistGuestRows,
+    setError,
+    showMobileToast,
+    eventQueryEnabled,
+  })
 
   /** לאחר מחיקת כרטיס השרת עלול לעדכן שורות כספים — ריענון מלא של המעטפת + סטטיסטיקה */
   const refreshFinanceLinesOnly = useCallback(() => {
@@ -763,6 +727,11 @@ export function useGuestListPageModel() {
 
   async function handleAdd() {
     if (!currentEventId || !newName.trim() || !newPhone.trim()) return
+    if (formatIsraelMobileE164(newPhone.trim()) === null) {
+      hapticError()
+      showMobileToast('err', 'מספר טלפון לא תקין')
+      return
+    }
     if (!newGuestRecipient) {
       setError('בחרו אדמין (מי שולם) או המתינו לטעינת הרשאות')
       return
@@ -835,74 +804,7 @@ export function useGuestListPageModel() {
         },
       })
 
-      /** שליחה אוטומטית רק אם: זהות ראשונה, תבנית מאושרת, מספר תקין, יתרת Twilio ≥ 2 (כשהבדיקה מצליחה) */
-      let twilioBalanceAllowsSend = true
-      try {
-        const bal = await fetchTwilioBalanceForEvent(currentEventId)
-        twilioBalanceAllowsSend = bal.balance >= 2
-      } catch {
-        /* אם לא הצלחנו לקרוא יתרה — ממשיכים לנסות; send-whatsapp יחסום ב-402 אם אין מספיק */
-        twilioBalanceAllowsSend = true
-      }
-
-      if (
-        wasFirstIdentityTicket &&
-        currentEvent &&
-        isTwilioWhatsappInviteTemplateApproved(currentEvent) &&
-        formatIsraelMobileE164(guest.phone) &&
-        twilioBalanceAllowsSend
-      ) {
-        setTwilioSendingGuestId(guest.id)
-        try {
-          const out = await sendGuestWhatsAppViaTwilio(currentEventId, guest.id)
-          const shell = queryClient.getQueryData<PartyEventShell>(
-            partyQueryKeys.partyShell(currentEventId),
-          )
-          const gList = shell?.guests ?? []
-          await persistGuestRows(
-            gList
-              .filter((row) => out.marked_guest_ids.includes(row.id))
-              .map((row) => ({
-                ...row,
-                whatsapp_invite_sent_at: out.sent_at,
-                invite_sent_method: 'twilio',
-                updated_at: out.sent_at,
-                whatsapp_invite_twilio_sid: out.twilio_sid?.trim() ? out.twilio_sid.trim() : null,
-                whatsapp_invite_twilio_status: (out.twilio_status ?? 'sent').toLowerCase(),
-              })),
-          )
-          hapticSuccess()
-          showMobileToast('ok', 'נשלחה הזמנה WhatsApp אוטומטית', { durationMs: 2400 })
-          logUserActivity({
-            kind: 'whatsapp',
-            action: 'twilio_auto_after_create',
-            eventId: currentEventId,
-            detail: { guest_id: guest.id },
-          })
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : 'שליחה אוטומטית נכשלה'
-          hapticError()
-          showMobileToast('err', msg, { durationMs: 3600 })
-          logUserActivity({
-            kind: 'whatsapp',
-            action: 'twilio_auto_after_create_error',
-            eventId: currentEventId,
-            detail: { guest_id: guest.id, error: msg },
-          })
-        } finally {
-          setTwilioSendingGuestId(null)
-        }
-      } else if (
-        wasFirstIdentityTicket &&
-        currentEvent &&
-        isTwilioWhatsappInviteTemplateApproved(currentEvent) &&
-        formatIsraelMobileE164(guest.phone) &&
-        !twilioBalanceAllowsSend
-      ) {
-        showMobileToast('info', 'לא נשלחה הזמנה אוטומטית — יתרת Twilio מתחת לסף ($2). השתמשו בכפתור הווטסאפ או בהעתקה.', {
-          durationMs: 4200,
-        })
-      }
+      await runTwilioAutoInviteAfterCreateIfEligible({ guest, wasFirstIdentityTicket })
     } catch (e) {
       const em = e instanceof Error ? e.message : 'שגיאה'
       setError(em)
@@ -1002,12 +904,18 @@ export function useGuestListPageModel() {
 
   const handleAddTicket = useCallback(
     async (members: Guest[]) => {
+      if (!isPartner) return
       if (!currentEventId) return
       const g0 = members[0]!
       if (g0.source === 'pay_at_door') return
       if (!g0.name?.trim() || !g0.phone?.trim()) {
         setError('מלאו שם ופלאפון לפני הוספת כרטיס (שמירה בשדה)')
         hapticError()
+        return
+      }
+      if (formatIsraelMobileE164(g0.phone.trim()) === null) {
+        hapticError()
+        showMobileToast('err', 'מספר טלפון לא תקין')
         return
       }
       if (!window.confirm('להוסיף כרטיס נוסף לאותה זהות (אותו שם וטלפון)?')) return
@@ -1080,11 +988,12 @@ export function useGuestListPageModel() {
         setTicketActionKey(null)
       }
     },
-    [currentEventId, financeLines, queryClient, showMobileToast],
+    [currentEventId, financeLines, isPartner, queryClient, showMobileToast],
   )
 
   const handleRemoveOneTicket = useCallback(
     async (members: Guest[]) => {
+      if (!isPartner) return
       if (members.length <= 1) return
       const g0 = members[0]!
       if (g0.source === 'pay_at_door') return
@@ -1130,7 +1039,7 @@ export function useGuestListPageModel() {
         setTicketActionKey(null)
       }
     },
-    [currentEventId, queryClient, refreshFinanceLinesOnly, showMobileToast],
+    [currentEventId, isPartner, queryClient, refreshFinanceLinesOnly, showMobileToast],
   )
 
   async function rowCopyWhatsAppMessage(id: string) {
@@ -1209,85 +1118,6 @@ export function useGuestListPageModel() {
     }
   }
 
-  async function rowSendTwilio(guestId: string) {
-    if (!currentEventId) {
-      throw new Error('אין אירוע פעיל')
-    }
-    if (!isTwilioWhatsappInviteTemplateApproved(currentEvent)) {
-      showMobileToast(
-        'err',
-        'שליחת WhatsApp דרך Twilio זמינה רק אחרי אישור תבנית ההודעה ב-Meta. עברו ללשונית «וואטסאפ».',
-        { placement: 'center', durationMs: 2600 },
-      )
-      hapticError()
-      logUserActivity({
-        kind: 'whatsapp',
-        action: 'twilio_blocked_template',
-        eventId: currentEventId,
-        detail: { guest_id: guestId },
-      })
-      throw new Error('template_not_approved')
-    }
-    const g = guests.find((x) => x.id === guestId)
-    if (g?.source === 'pay_at_door') {
-      showMobileToast('err', 'אין מספר טלפון לתשלום בכניסה')
-      hapticError()
-      logUserActivity({
-        kind: 'whatsapp',
-        action: 'twilio_blocked_pay_at_door',
-        eventId: currentEventId,
-        detail: { guest_id: guestId },
-      })
-      throw new Error('pay_at_door')
-    }
-    setError(null)
-    setTwilioSendingGuestId(guestId)
-    try {
-      const out = await sendGuestWhatsAppViaTwilio(currentEventId, guestId)
-      const shell = queryClient.getQueryData<PartyEventShell>(
-        partyQueryKeys.partyShell(currentEventId),
-      )
-      const gList = shell?.guests ?? []
-      await persistGuestRows(
-        gList
-          .filter((guest) => out.marked_guest_ids.includes(guest.id))
-          .map((guest) => ({
-            ...guest,
-            whatsapp_invite_sent_at: out.sent_at,
-            invite_sent_method: 'twilio',
-            updated_at: out.sent_at,
-            whatsapp_invite_twilio_sid: out.twilio_sid?.trim() ? out.twilio_sid.trim() : null,
-            whatsapp_invite_twilio_status: (out.twilio_status ?? 'sent').toLowerCase(),
-          })),
-      )
-      hapticSuccess()
-      logUserActivity({
-        kind: 'whatsapp',
-        action: 'twilio_send_ok',
-        eventId: currentEventId,
-        detail: {
-          guest_id: guestId,
-          guest_name: g?.name,
-          phone: g?.phone,
-          twilio_response: out,
-        },
-      })
-    } catch (e) {
-      hapticError()
-      const msg = e instanceof Error ? e.message : 'שגיאה בשליחת Twilio'
-      setError(msg)
-      logUserActivity({
-        kind: 'whatsapp',
-        action: 'twilio_send_error',
-        eventId: currentEventId,
-        detail: { guest_id: guestId, guest_name: g?.name, error: msg },
-      })
-      throw e instanceof Error ? e : new Error(msg)
-    } finally {
-      setTwilioSendingGuestId(null)
-    }
-  }
-
   async function onPasteBulk() {
     if (!currentEventId || !pasteText.trim() || pasteSubmitting) return
     setError(null)
@@ -1320,6 +1150,11 @@ export function useGuestListPageModel() {
       if (result.skipped > 0) {
         parts.push(
           result.skipped === 1 ? 'שורה כפולה דולגה' : `דולגו ${result.skipped} שורות כפולות`,
+        )
+      }
+      if (result.skippedInvalidPhone > 0) {
+        parts.push(
+          `${result.skippedInvalidPhone} שורות לא נוספו בגלל מספר טלפון לא תקין`,
         )
       }
       if (result.queuedForWhatsapp > 0) {
@@ -1360,6 +1195,7 @@ export function useGuestListPageModel() {
         detail: {
           added: result.added,
           skipped: result.skipped,
+          skipped_invalid_phone: result.skippedInvalidPhone,
           queued_for_whatsapp: result.queuedForWhatsapp,
           created_guest_ids: result.createdGuests.map((g) => g.id),
           finance_line_ids: result.financeLinesCreated.map((l) => l.id),
@@ -1567,6 +1403,7 @@ export function useGuestListPageModel() {
     onPasteBulk,
     handleGuestSearch,
     listDisabled,
-    searchDisabled
+    searchDisabled,
+    isPartner,
   }
 }

@@ -60,7 +60,7 @@ function GuestWhatsAppUnifiedControlInner({
   if (payAtDoor) title = 'תשלום בכניסה — אין שליחה'
   else if (!phoneValid) title = 'אין מספר טלפון'
   else if (localErr) {
-    title = 'השליחה נכשלה — אפשר לנסות שוב, או להשתמש בכפתור 💬 «העתק הודעה» ליד'
+    title = 'השליחה נכשלה — אפשר לנסות שוב, או להשתמש בכפתור «העתק הודעה» ליד'
   } else if (canResend) {
     title = 'שלח שוב דרך Twilio (יוצג אישור)'
   } else if (!twilioTemplateApproved && !inviteAllSent) {

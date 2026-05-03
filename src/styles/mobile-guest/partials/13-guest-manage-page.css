@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 0 calc(90px + env(safe-area-inset-bottom, 0px));
+  padding: 0;
 }
 
 @media (min-width: 900px) {

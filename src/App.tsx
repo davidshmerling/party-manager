@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { AdminShell } from './components/AdminShell'
 import { HomeLayout } from './components/HomeLayout'
@@ -112,7 +111,6 @@ export default function App() {
 
         <Route path="*" element={<Navigate to={LANDING_PATH} replace />} />
       </Routes>
-      <SpeedInsights />
       </>
     </BrowserRouter>
   )

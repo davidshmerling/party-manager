@@ -5,7 +5,7 @@ import { useAuth } from '../../auth/AuthProvider'
 import { MarketingSiteFooter } from '../landing/MarketingSiteFooter'
 import { SITE_PARTY_BRAND } from '../../config/sitePartyBrand'
 import { LANDING_UPCOMING_PARTIES_URL, LANDING_PATH, STAFF_HOME_PATH } from '../../constants/appRoutes'
-import { publicImageBrand, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
+import { publicAppIcon, hideBrokenPublicImage } from '../../lib/publicAssetUrl'
 import { useDebugPublicImageSrc } from '../../hooks/useDebugPublicImageSrc'
 import { useResolvedSiteMarketing } from '../../hooks/useSiteMarketingAssets'
 
@@ -61,7 +61,7 @@ export function PartyMarketingShell({ children, title }: Props) {
   const { loading, session } = useAuth()
   const marketing = useResolvedSiteMarketing()
   const logoUrl = useMemo(
-    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicImageBrand('logo.svg')),
+    () => (marketing?.iconUrl?.trim() ? marketing.iconUrl.trim() : publicAppIcon()),
     [marketing?.iconUrl],
   )
   useDebugPublicImageSrc('PartyMarketingShell header logo', logoUrl)

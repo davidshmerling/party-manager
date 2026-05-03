@@ -1,42 +1,8 @@
 /** קישורי WhatsApp (אפליקציה / wa.me) והזמנה — ללא שרת חיצוני */
 
-export function normalizePhoneForWa(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.length === 10 && digits.startsWith('05')) return `972${digits.slice(1)}`
-  if (digits.length === 9 && digits.startsWith('5')) return `972${digits}`
-  return digits
-}
+import { formatIsraelMobileE164, normalizePhoneForWa } from './formatIsraelMobileE164'
 
-/**
- * מנרמל להדבקה בלבד — פלט אחיד: `+9725XXXXXXXX` (E.164 לנייד ישראלי).
- * השדה בממשק ממשיך להציג את מה שהמשתמש הזין; כאן רק מעתיקים פורמט בינלאומי אחיד.
- *
- * | קלט (אחרי סילוק לא-ספרות) | פלט |
- * |---------------------------|-----|
- * | `972543966264` (12) | `+972543966264` |
- * | `0543966264` (10) | `+972543966264` |
- * | `543966264` (9) | `+972543966264` |
- * | אחרת | `null` |
- */
-export function formatIsraelMobileE164(phone: string): string | null {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return null
-
-  if (digits.length === 12 && digits.startsWith('972') && digits[3] === '5') {
-    return `+${digits}`
-  }
-
-  if (digits.length === 10 && digits.startsWith('05')) {
-    return `+972${digits.slice(1)}`
-  }
-
-  if (digits.length === 9 && digits.startsWith('5')) {
-    return `+972${digits}`
-  }
-
-  return null
-}
+export { formatIsraelMobileE164, normalizePhoneForWa }
 
 export function publicFrontendBase(): string {
   const v = import.meta.env.VITE_PUBLIC_FRONTEND_URL as string | undefined

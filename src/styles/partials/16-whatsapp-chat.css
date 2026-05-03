@@ -1,26 +1,14 @@
-/* העתקת WA — אימוג׳י + אייקון */
+/* העתקת WA — אייקון בועה בלבד */
 .guest-desk-act--copy-wa {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.12rem;
-}
-
-.guest-desk-act__emoji {
-  font-size: 0.85rem;
-  line-height: 1;
 }
 
 .guest-mob-primary-ico--copy-wa {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-}
-
-.guest-mob-primary-ico-emoji {
-  font-size: 0.82rem;
-  line-height: 1;
 }
 
 /* סימוני סטטוס Twilio ליד כפתורי WA ברשימת אורחים */
