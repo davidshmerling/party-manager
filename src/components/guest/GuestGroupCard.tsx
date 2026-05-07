@@ -84,60 +84,53 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
       className={`guest-mob-card guest-mob-card--compact${searchHighlight ? ' guest-mob-card--search-flash' : ''}${isFocused ? ' guest-mob-card--focused' : ''}`}
       data-guest-group={groupKey}
     >
-      <div className="guest-mob-compact__r1">
-        <div className="guest-mob-compact__r1-inner">
-          <span className="guest-mob-compact__num" onClick={() => onCardPress(groupKey)} role="presentation">
-            {rowNum}.
-          </span>
-          <input
-            className="guest-mob-compact__name guest-mob-hero-name"
-            value={name}
-            placeholder="שם מלא"
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => void saveField('name', name)}
-            onClick={(e) => e.stopPropagation()}
-            aria-label="שם אורח"
-          />
-        </div>
-      </div>
-
-      <div className="guest-mob-compact__r2">
-        {payAtDoor ? (
-          <span className="guest-mob-compact__phone guest-mob-compact__phone--static muted" aria-label="מקור">
-            תשלום בכניסה
-          </span>
-        ) : (
-          <div className="guest-mob-compact__r2-line">
-            <input
-              className="guest-mob-compact__phone guest-mob-hero-phone"
-              value={phone}
-              placeholder="טלפון"
-              inputMode="tel"
-              onChange={(e) => setPhone(e.target.value)}
-              onBlur={() => void saveField('phone', phone)}
-              onClick={(e) => e.stopPropagation()}
-              aria-label="מספר טלפון"
-            />
-            {onAddTicket ? (
-              <GuestTicketStepper
-                variant="mobile"
-                count={members.length}
-                canRemove={members.length > 1}
-                disabled={ticketActionPending}
-                onAdd={onAddTicket}
-                onRemove={() => {
-                  if (onRemoveOneTicket) void onRemoveOneTicket()
-                }}
+      <div className="guest-mob-compact__r-name-phone" onClick={(e) => e.stopPropagation()}>
+        <div className="guest-mob-compact__name-phone-cell">
+          <span className="guest-mob-compact__col-label muted">שם</span>
+          <div className="guest-mob-compact__r1">
+            <div className="guest-mob-compact__r1-inner">
+              <span className="guest-mob-compact__num" onClick={() => onCardPress(groupKey)} role="presentation">
+                {rowNum}.
+              </span>
+              <input
+                className="guest-mob-compact__name guest-mob-hero-name"
+                value={name}
+                placeholder="שם מלא"
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => void saveField('name', name)}
+                onClick={(e) => e.stopPropagation()}
+                aria-label="שם אורח"
               />
-            ) : null}
+            </div>
           </div>
-        )}
+        </div>
+        <div className="guest-mob-compact__name-phone-cell">
+          <span className="guest-mob-compact__col-label muted">פלאפון</span>
+          <div className="guest-mob-compact__r2 guest-mob-compact__r2--phone-only">
+            {payAtDoor ? (
+              <span className="guest-mob-compact__phone guest-mob-compact__phone--static muted" aria-label="מקור">
+                תשלום בכניסה
+              </span>
+            ) : (
+              <input
+                className="guest-mob-compact__phone guest-mob-hero-phone guest-mob-compact__phone--full"
+                value={phone}
+                placeholder="טלפון"
+                inputMode="tel"
+                onChange={(e) => setPhone(e.target.value)}
+                onBlur={() => void saveField('phone', phone)}
+                onClick={(e) => e.stopPropagation()}
+                aria-label="מספר טלפון"
+              />
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="guest-mob-compact__r2 guest-mob-compact__r-price-pay" onClick={(e) => e.stopPropagation()}>
         {incomeLineIds.length > 0 && onSaveIncomeAmount ? (
           <>
-            <span className="guest-mob-compact__hint muted guest-mob-compact__hint--inline">מחיר ‏(₪)</span>
+            <span className="guest-mob-compact__hint muted guest-mob-compact__hint--inline">מחיר (₪)</span>
             <input
               className="guest-mob-compact__name guest-mob-compact__price-input"
               inputMode="decimal"
@@ -183,55 +176,80 @@ function GuestGroupCardInner(props: GuestGroupRowProps) {
         )}
       </div>
 
-      <div className="guest-mob-compact__r3 guest-mob-compact__r3--manage-strip" onClick={(e) => e.stopPropagation()}>
-        <div
-          className="guest-mob-compact__chips guest-mob-compact__chips--manage-strip"
-          role="group"
-          aria-label="כניסה, הזמנה ופעולות"
-        >
-          <button
-            type="button"
-            className="guest-mob-primary-ico guest-mob-primary-ico--copy guest-mob-primary-ico--copy-wa"
-            title="העתק הודעת WhatsApp"
-            aria-label="העתק הודעת WhatsApp"
-            onClick={(e) => {
-              e.stopPropagation()
-              void onCopyWaMessage(rep.id)
-            }}
-          >
-            <MobPrimarySvgChat />
-          </button>
+      <div className="guest-mob-compact__r-manage-all" onClick={(e) => e.stopPropagation()}>
+        <div className="guest-mob-compact__manage-cell">
+          <span className="guest-mob-compact__col-label muted">כניסה</span>
           <GuestEntryMarkButton variant="mob" members={members} saveStatus={saveStatus} />
+        </div>
+        <div className="guest-mob-compact__manage-cell guest-mob-compact__manage-cell--invite">
+          <span className="guest-mob-compact__col-label muted">הזמנה</span>
           <GuestInviteSentMarkButton
             variant="mob"
             members={members}
             saveInviteSent={saveInviteSent}
             allowManualToggle={inviteManualAllowed}
           />
-          {onSendTwilio ? (
-            <GuestWhatsAppUnifiedControl
-              guestId={rep.id}
-              phone={phone}
-              source={payAtDoor ? 'pay_at_door' : 'list'}
-              members={members}
-              twilioTemplateApproved={twilioTemplateApproved}
-              twilioSendingGuestId={twilioSendingGuestId}
-              onSend={onSendTwilio}
-              variant="mob"
-            />
-          ) : null}
-          <button
-            type="button"
-            className="guest-mob-primary-ico guest-mob-primary-ico--del"
-            title="הסר מהרשימה"
-            aria-label="הסר מהרשימה"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(members.map((x) => x.id))
+        </div>
+      </div>
+
+      <div className="guest-mob-compact__r2 guest-mob-compact__r-tickets" onClick={(e) => e.stopPropagation()}>
+        <span className="guest-mob-compact__hint muted guest-mob-compact__hint--inline">כמות כרטיסים</span>
+        {onAddTicket ? (
+          <GuestTicketStepper
+            variant="mobile"
+            count={members.length}
+            canRemove={members.length > 1}
+            disabled={ticketActionPending}
+            onAdd={onAddTicket}
+            onRemove={() => {
+              if (onRemoveOneTicket) void onRemoveOneTicket()
             }}
-          >
-            <MobPrimarySvgTrash />
-          </button>
+          />
+        ) : (
+          <span className="guest-mob-compact__tickets-readonly muted" title="מספר כרטיסים">
+            {members.length}
+          </span>
+        )}
+        <div className="guest-mob-compact__r-tickets-actions">
+          <span className="guest-mob-compact__hint muted guest-mob-compact__hint--inline">פעולות</span>
+          <div className="guest-mob-compact__chips guest-mob-compact__chips--manage-strip" role="group" aria-label="פעולות שורה">
+            <button
+              type="button"
+              className="guest-mob-primary-ico guest-mob-primary-ico--copy guest-mob-primary-ico--copy-wa"
+              title="העתק הודעת WhatsApp"
+              aria-label="העתק הודעת WhatsApp"
+              onClick={(e) => {
+                e.stopPropagation()
+                void onCopyWaMessage(rep.id)
+              }}
+            >
+              <MobPrimarySvgChat />
+            </button>
+            {onSendTwilio ? (
+              <GuestWhatsAppUnifiedControl
+                guestId={rep.id}
+                phone={phone}
+                source={payAtDoor ? 'pay_at_door' : 'list'}
+                members={members}
+                twilioTemplateApproved={twilioTemplateApproved}
+                twilioSendingGuestId={twilioSendingGuestId}
+                onSend={onSendTwilio}
+                variant="mob"
+              />
+            ) : null}
+            <button
+              type="button"
+              className="guest-mob-primary-ico guest-mob-primary-ico--del"
+              title="הסר מהרשימה"
+              aria-label="הסר מהרשימה"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(members.map((x) => x.id))
+              }}
+            >
+              <MobPrimarySvgTrash />
+            </button>
+          </div>
         </div>
       </div>
     </article>

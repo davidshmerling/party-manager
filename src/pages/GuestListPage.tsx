@@ -52,6 +52,8 @@ export function GuestListPage() {
             adminLabel={m.adminLabel}
             newGuestPrice={m.newGuestPrice}
             setNewGuestPrice={m.setNewGuestPrice}
+            newGuestQuantity={m.newGuestQuantity}
+            setNewGuestQuantity={m.setNewGuestQuantity}
             listDisabled={m.listDisabled}
             onAdd={m.handleAdd}
           />

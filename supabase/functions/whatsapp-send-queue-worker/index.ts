@@ -1,5 +1,6 @@
 /**
- * Worker: מעבד תור whatsapp_send_queue — Cron כל דקה (Authorization: Bearer SERVICE_ROLE_KEY).
+ * Worker: מעבד תור whatsapp_send_queue (הודעה אחת לכל ריצה).
+ * מומלץ להפעיל ע"י Scheduler כל ~10 שניות (Authorization: Bearer SERVICE_ROLE_KEY).
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
 import {
@@ -76,7 +77,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: claimed, error: claimErr } = await serviceSb.rpc(
     'claim_whatsapp_send_queue_batch',
-    { p_limit: 20 },
+    { p_limit: 1 },
   )
 
   if (claimErr) {

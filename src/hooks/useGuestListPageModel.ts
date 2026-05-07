@@ -85,6 +85,7 @@ export function useGuestListPageModel() {
   const [newPhone, setNewPhone] = useState('')
   const [newGuestRecipient, setNewGuestRecipient] = useState<string>('')
   const [newGuestPrice, setNewGuestPrice] = useState('')
+  const [newGuestQuantity, setNewGuestQuantity] = useState('1')
   const [pasteText, setPasteText] = useState('')
   const [pasteSubmitting, setPasteSubmitting] = useState(false)
   const [pasteMsg, setPasteMsg] = useState<string | null>(null)
@@ -764,22 +765,38 @@ export function useGuestListPageModel() {
       const raw = newGuestPrice.trim().replace(',', '.')
       const parsed = raw === '' ? 0 : Number(raw)
       const amount = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
-      const { guest, financeLine, wasFirstIdentityTicket } = await createGuest(
-        newName.trim(),
-        newPhone.trim(),
-        currentEventId,
-        {
-          incomeRecipientAdminId: incomeAdminId,
-          incomeRecipientKind: incomeKind,
-          isPaid: false,
-          amount,
-        },
-      )
+      const qRaw = newGuestQuantity.trim()
+      const qParsed = Number(qRaw)
+      const quantity = Number.isInteger(qParsed) && qParsed > 0 ? qParsed : 1
+      const createdGuests: Guest[] = []
+      const createdFinanceLines: EventFinanceLine[] = []
+      let firstCreateResult: { guest: Guest; wasFirstIdentityTicket: boolean } | null = null
+      for (let i = 0; i < quantity; i += 1) {
+        const { guest, financeLine, wasFirstIdentityTicket } = await createGuest(
+          newName.trim(),
+          newPhone.trim(),
+          currentEventId,
+          {
+            incomeRecipientAdminId: incomeAdminId,
+            incomeRecipientKind: incomeKind,
+            isPaid: false,
+            amount,
+          },
+        )
+        if (i === 0) {
+          firstCreateResult = { guest, wasFirstIdentityTicket }
+        }
+        createdGuests.push(guest)
+        if (financeLine) createdFinanceLines.push(financeLine)
+      }
       updateCachedPartyShellGuests(queryClient, currentEventId, (prev) =>
-        sortGuestsLikeFetch([...prev, guest]),
+        sortGuestsLikeFetch([...prev, ...createdGuests]),
       )
-      if (financeLine) {
-        updateCachedPartyShellFinanceLines(queryClient, currentEventId, (fPrev) => [financeLine, ...fPrev])
+      if (createdFinanceLines.length > 0) {
+        updateCachedPartyShellFinanceLines(queryClient, currentEventId, (fPrev) => [
+          ...createdFinanceLines,
+          ...fPrev,
+        ])
       }
       invalidatePartyEventStatsQueries(queryClient, currentEventId)
       setNewName('')
@@ -794,17 +811,24 @@ export function useGuestListPageModel() {
         action: 'create_single',
         eventId: currentEventId,
         detail: {
-          guest_id: guest.id,
-          name: guest.name,
-          phone: guest.phone,
+          guest_id: createdGuests[0]?.id ?? null,
+          guest_ids: createdGuests.map((g) => g.id),
+          name: createdGuests[0]?.name ?? newName.trim(),
+          phone: createdGuests[0]?.phone ?? newPhone.trim(),
+          quantity: createdGuests.length,
           amount,
           income_kind: incomeKind,
           income_admin_id: incomeAdminId,
-          finance_line_id: financeLine?.id ?? null,
+          finance_line_id: createdFinanceLines[0]?.id ?? null,
+          finance_line_ids: createdFinanceLines.map((l) => l.id),
         },
       })
-
-      await runTwilioAutoInviteAfterCreateIfEligible({ guest, wasFirstIdentityTicket })
+      if (firstCreateResult) {
+        await runTwilioAutoInviteAfterCreateIfEligible({
+          guest: firstCreateResult.guest,
+          wasFirstIdentityTicket: firstCreateResult.wasFirstIdentityTicket,
+        })
+      }
     } catch (e) {
       const em = e instanceof Error ? e.message : 'שגיאה'
       setError(em)
@@ -816,6 +840,7 @@ export function useGuestListPageModel() {
           error: em,
           name: newName.trim(),
           phone: newPhone.trim(),
+          quantity: newGuestQuantity.trim(),
           income_kind: incomeKind,
           income_admin_id: incomeAdminId,
         },
@@ -1160,8 +1185,8 @@ export function useGuestListPageModel() {
       if (result.queuedForWhatsapp > 0) {
         parts.push(
           result.queuedForWhatsapp === 1
-            ? 'הוזמנה שליחת WhatsApp אחת לתור (עד ~10 דק׳)'
-            : `${result.queuedForWhatsapp} הזמנות בוצעו לתור WhatsApp (פיזור עד ~10 דק׳)`,
+            ? 'הוזמנה שליחת WhatsApp אחת לתור (3–7 שניות בין הודעות)'
+            : `${result.queuedForWhatsapp} הזמנות בוצעו לתור WhatsApp (פיזור של 3–7 שניות בין הודעות)`,
         )
       }
       if (parts.length === 0) {
@@ -1336,6 +1361,8 @@ export function useGuestListPageModel() {
     setNewGuestRecipient,
     newGuestPrice,
     setNewGuestPrice,
+    newGuestQuantity,
+    setNewGuestQuantity,
     pasteText,
     setPasteText,
     pasteSubmitting,

@@ -42,7 +42,7 @@ export type GuestGroupRowProps = {
   onAddTicket?: () => void | Promise<void>
   /** הסרת כרטיס אחד (נשארים ≥1) */
   onRemoveOneTicket?: () => void | Promise<void>
-  /** שותף — כרטיסים + סימון הזמנה ידני (לא במצב mixed) */
+  /** שותף — כרטיסים + סימון הזמנה ידני (לפי חוקי OR ב־guestInviteSegment) */
   isPartner?: boolean
   /** בזמן בקשת רשת */
   ticketActionPending?: boolean

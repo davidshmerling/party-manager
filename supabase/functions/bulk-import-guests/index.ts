@@ -419,13 +419,12 @@ Deno.serve(async (req: Request) => {
 
   let queuedForWhatsapp = 0
   if (queueGuestIds.length > 0) {
-    const batchStart = Date.now() + 60_000
-    const batchEnd = Date.now() + 600_000
-    const nq = queueGuestIds.length
-    const rows = queueGuestIds.map((guest_id, i) => {
-      const segLo = batchStart + (i * (batchEnd - batchStart)) / nq
-      const segHi = batchStart + ((i + 1) * (batchEnd - batchStart)) / nq
-      const sendAfter = new Date(segLo + Math.random() * Math.max(1, segHi - segLo)).toISOString()
+    let nextAt = Date.now()
+    const rows = queueGuestIds.map((guest_id) => {
+      // רצף שליחה אמיתי: כל הודעה מתוזמנת 3-7 שניות אחרי הקודמת.
+      const delaySec = 3 + Math.floor(Math.random() * 5)
+      nextAt += delaySec * 1000
+      const sendAfter = new Date(nextAt).toISOString()
       return {
         event_id: eventId,
         guest_id,

@@ -775,6 +775,7 @@ select.guest-mob-compact__recipient-select {
 
 .guest-invite-seg__track {
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   direction: rtl;
@@ -806,6 +807,7 @@ select.guest-mob-compact__recipient-select {
   background: #f9fafb;
 }
 
+/* מחוון ויזואלי בלבד — חייב שלא לחסום לחיצות על ה־buttons */
 .guest-invite-seg__thumb {
   position: absolute;
   z-index: 0;
@@ -835,6 +837,9 @@ select.guest-mob-compact__recipient-select {
 }
 
 .guest-invite-seg__cell--tap {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -894,6 +899,7 @@ select.guest-mob-compact__recipient-select {
 
 .guest-entry-seg__track {
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   direction: rtl;
@@ -949,6 +955,9 @@ select.guest-mob-compact__recipient-select {
 }
 
 .guest-entry-seg__cell--tap {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
   border: 0;
   background: transparent;
   cursor: pointer;

@@ -1,10 +1,10 @@
 import type { Guest } from '../types/guest'
 
-/** מצב תצוגה לכרטיס בודד (לא כולל mixed) */
+/** מצב תצוגה לכרטיס בודד / לקבוצה (אותה לוגיקת עדיפות) */
 export type InviteSegmentVisual = 'not_sent' | 'sent' | 'seen'
 
-/** מצב קבוצה — mixed כשהכרטיסים לא אחידים */
-export type InviteSegmentGroup = InviteSegmentVisual | 'mixed'
+/** שם היסטורי — זהה ל־InviteSegmentVisual (אין עוד מצב mixed בקבוצה) */
+export type InviteSegmentGroup = InviteSegmentVisual
 
 /** שלא נשלח: אין שיטה, אין חותמת שליחה, אין SID טוויליו */
 export function isGuestDbNotSent(m: Guest): boolean {
@@ -15,41 +15,40 @@ export function isGuestDbNotSent(m: Guest): boolean {
   return !method && !hasAt && !hasSid
 }
 
+/** נשלח לפי DB: שיטה / חותמת / SID טוויליו */
+export function isGuestInviteSent(m: Guest): boolean {
+  return !isGuestDbNotSent(m)
+}
+
+/** נצפה: נפתח כרטיס או Twilio ‎`read`‎ (לוגיקת OR בקבוצה — לא דורש קודם «נשלח») */
+export function isGuestInviteSeen(m: Guest): boolean {
+  const st = String(m.whatsapp_invite_twilio_status ?? '').trim().toLowerCase()
+  return m.card_opened_at != null || st === 'read'
+}
+
 /**
- * שלושת מצבי ה-segment:
- * not_sent — אין אינדיקציה לשליחה
- * sent — נשלח; כולל סטטוסי Twilio לפני «נקרא» (למשל queued, sent, delivered) — ✓✓ אפור בעמודת «נשלח»
- * seen — Twilio ‎`read`‎ (נקרא בווטסאפ) או נפתח כרטיס — ✓✓ כחול בעמודת «נצפה»
+ * כרטיס בודד — סדר עדיפות: seen > sent > not_sent
  */
 export function memberInviteSegment(m: Guest): InviteSegmentVisual {
-  if (isGuestDbNotSent(m)) return 'not_sent'
-
-  const st = String(m.whatsapp_invite_twilio_status ?? '').trim().toLowerCase()
-  if (m.card_opened_at != null || st === 'read') return 'seen'
-
-  return 'sent'
+  if (isGuestInviteSeen(m)) return 'seen'
+  if (isGuestInviteSent(m)) return 'sent'
+  return 'not_sent'
 }
 
+/**
+ * קבוצת כרטיסים לאותה זהות — OR לוגי:
+ * - אם לאחד יש seen → כל הסגמנט seen
+ * - אחרת אם לאחד יש sent → sent
+ * - אחרת not_sent
+ */
 export function groupInviteSegment(members: Guest[]): InviteSegmentGroup {
   if (members.length === 0) return 'not_sent'
-  const ms = members.map(memberInviteSegment)
-  const u = new Set(ms)
-  if (u.size === 1) return ms[0]!
-  return 'mixed'
+  if (members.some(isGuestInviteSeen)) return 'seen'
+  if (members.some(isGuestInviteSent)) return 'sent'
+  return 'not_sent'
 }
 
-/** מיקום הגלילה ב־mixed: עדיפות ל־not_sent; אחרת אמצע (sent) */
-export function groupInviteThumbSegment(
-  groupSeg: InviteSegmentGroup,
-  members: Guest[],
-): InviteSegmentVisual {
-  if (groupSeg !== 'mixed') return groupSeg
-  const ms = members.map(memberInviteSegment)
-  if (ms.some((x) => x === 'not_sent')) return 'not_sent'
-  return 'sent'
-}
-
-/** שינוי ידני של סגמנט ההזמנה (שותף) — לא כשהכרטיסים במצבים מעורבים */
+/** שינוי ידני (שותף) — כשיש כרטיסים בקבוצה */
 export function partnerInviteManualEditAllowed(members: Guest[]): boolean {
-  return groupInviteSegment(members) !== 'mixed'
+  return members.length > 0
 }

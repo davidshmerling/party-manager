@@ -8,11 +8,11 @@ export type PartnerNet = { id: string; label: string; net: number }
 export type EqualSplitResult = {
   fairShare: number
   perPartner: { id: string; label: string; net: number; diffFromFair: number }[]
-  payboxTransfers: { fromLabel: string; toLabel: string; amount: number }[]
+  equalizingTransfers: { fromLabel: string; toLabel: string; amount: number }[]
   transferCount: number
 }
 
-/** בריכת פייבוקס בהוראות איזון — תווית קבועה (מופיעה ראשונה ברשימת משלמים) */
+/** בריכת פייבוקס בהוראות איזון — תווית קבועה */
 export const EQUAL_SPLIT_PAYBOX_LABEL = 'פייבוקס'
 
 export type PoolPayer = { label: string; amount: number }
@@ -28,7 +28,7 @@ export function computeEqualizingTransfers(
 ): EqualSplitResult {
   const n = partners.length
   if (n === 0) {
-    return { fairShare: 0, perPartner: [], payboxTransfers: [], transferCount: 0 }
+    return { fairShare: 0, perPartner: [], equalizingTransfers: [], transferCount: 0 }
   }
   const fairShare = roundMoney(totalNet / n)
   const perPartner = partners.map((p) => {
@@ -36,22 +36,23 @@ export function computeEqualizingTransfers(
     return { ...p, diffFromFair }
   })
 
-  type Payer = { label: string; rem: number; poolOrder: number }
+  type Payer = { label: string; rem: number; payerOrder: number }
   const payers: Payer[] = []
+  // Policy: prefer partner-to-partner balancing before using pool money.
+  for (const p of perPartner) {
+    if (p.diffFromFair > 0.005) {
+      payers.push({ label: p.label, rem: p.diffFromFair, payerOrder: 0 })
+    }
+  }
   for (const pool of poolPayers) {
     const rem = roundMoney(pool.amount)
     if (rem > 0.005) {
-      const poolOrder = pool.label === EQUAL_SPLIT_PAYBOX_LABEL ? 0 : 1
-      payers.push({ label: pool.label, rem, poolOrder })
-    }
-  }
-  for (const p of perPartner) {
-    if (p.diffFromFair > 0.005) {
-      payers.push({ label: p.label, rem: p.diffFromFair, poolOrder: 2 })
+      const payerOrder = pool.label === EQUAL_SPLIT_PAYBOX_LABEL ? 1 : 2
+      payers.push({ label: pool.label, rem, payerOrder })
     }
   }
   payers.sort((a, b) => {
-    if (a.poolOrder !== b.poolOrder) return a.poolOrder - b.poolOrder
+    if (a.payerOrder !== b.payerOrder) return a.payerOrder - b.payerOrder
     return a.label.localeCompare(b.label, 'he')
   })
 
@@ -63,7 +64,7 @@ export function computeEqualizingTransfers(
   }
   receivers.sort((a, b) => a.label.localeCompare(b.label, 'he'))
 
-  const payboxTransfers: { fromLabel: string; toLabel: string; amount: number }[] = []
+  const equalizingTransfers: { fromLabel: string; toLabel: string; amount: number }[] = []
   let pi = 0
   let rj = 0
   while (pi < payers.length && rj < receivers.length) {
@@ -75,7 +76,7 @@ export function computeEqualizingTransfers(
       else rj += 1
       continue
     }
-    payboxTransfers.push({ fromLabel: a.label, toLabel: b.label, amount: pay })
+    equalizingTransfers.push({ fromLabel: a.label, toLabel: b.label, amount: pay })
     a.rem = roundMoney(a.rem - pay)
     b.rem = roundMoney(b.rem - pay)
     if (a.rem < 0.01) pi += 1
@@ -85,8 +86,8 @@ export function computeEqualizingTransfers(
   return {
     fairShare,
     perPartner,
-    payboxTransfers,
-    transferCount: payboxTransfers.length,
+    equalizingTransfers,
+    transferCount: equalizingTransfers.length,
   }
 }
 

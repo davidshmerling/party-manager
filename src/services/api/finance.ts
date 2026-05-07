@@ -1,10 +1,15 @@
-import type { EventFinanceLine, EventFinanceLineKind, IncomeRecipientKind } from '../../types/finance'
+import type {
+  EventFinanceLine,
+  EventFinanceLineKind,
+  IncomeRecipientKind,
+  TransferFromKind,
+} from '../../types/finance'
 import { sb, errMsg } from './client'
 import { mapEventFinanceLine } from './mappers'
 
 /** עמודות ל־mapEventFinanceLine — בלי `*` ברשימות */
 const EVENT_FINANCE_LINE_COLUMNS =
-  'id, event_id, line_kind, person_name, phone, amount, recipient_admin_id, transfer_from_admin_id, income_recipient_kind, is_paid, created_by, created_at, updated_at'
+  'id, event_id, line_kind, person_name, phone, amount, recipient_admin_id, transfer_from_admin_id, transfer_from_kind, income_recipient_kind, is_paid, created_by, created_at, updated_at'
 
 export async function fetchEventFinanceLines(eventId: string): Promise<EventFinanceLine[]> {
   const { data, error } = await sb()
@@ -23,9 +28,11 @@ export async function insertEventFinanceLine(p: {
   phone?: string
   amount?: number
   recipientAdminId: string
-  /** ‎selector_payout‎ בלבד */
+  /** ‎internal_transfer‎ בלבד */
   transferFromAdminId?: string
-  /** רק ‎income; ברירה ‎partner */
+  /** internal_transfer: מי המקור החשבונאי (למשל paybox) */
+  transferFromKind?: TransferFromKind
+  /** income: סוג נמען; expense: ניתן להשתמש ב־paybox כדי לסמן בריכת פייבוקס */
   incomeRecipientKind?: IncomeRecipientKind
   isPaid?: boolean
 }): Promise<EventFinanceLine> {
@@ -38,7 +45,7 @@ export async function insertEventFinanceLine(p: {
   const nameRaw = p.personName.trim()
   const name =
     nameRaw ||
-    (p.lineKind === 'selector_payout' ? 'העברה מסלקטור לשותף' : '')
+    (p.lineKind === 'internal_transfer' ? 'העברה פנימית' : '')
   if (!name) throw new Error('נדרש שם')
 
   const phone = p.phone?.trim() ?? ''
@@ -46,13 +53,20 @@ export async function insertEventFinanceLine(p: {
   const amount = typeof amt === 'number' && Number.isFinite(amt) ? amt : 0
 
   const incKind: IncomeRecipientKind | null =
-    p.lineKind === 'income' ? (p.incomeRecipientKind ?? 'partner') : null
+    p.lineKind === 'income'
+      ? (p.incomeRecipientKind ?? 'partner')
+      : p.lineKind === 'expense'
+        ? (p.incomeRecipientKind ?? 'partner')
+        : null
 
   const transferFrom =
-    p.lineKind === 'selector_payout' ? (p.transferFromAdminId?.trim() ?? '') : ''
-  if (p.lineKind === 'selector_payout' && !transferFrom) {
-    throw new Error('נא לבחור סלקטור (ממי יצא הכסף)')
+    p.lineKind === 'internal_transfer' ? (p.transferFromAdminId?.trim() ?? '') : ''
+  if (p.lineKind === 'internal_transfer' && !transferFrom) {
+    throw new Error('נא לבחור מי מעביר')
   }
+
+  const transferFromKind: TransferFromKind | null =
+    p.lineKind === 'internal_transfer' ? (p.transferFromKind ?? null) : null
 
   const { data, error } = await client
     .from('event_finance_lines')
@@ -63,7 +77,8 @@ export async function insertEventFinanceLine(p: {
       phone,
       amount,
       recipient_admin_id: p.recipientAdminId,
-      transfer_from_admin_id: p.lineKind === 'selector_payout' ? transferFrom : null,
+      transfer_from_admin_id: p.lineKind === 'internal_transfer' ? transferFrom : null,
+      transfer_from_kind: transferFromKind,
       income_recipient_kind: incKind,
       is_paid: p.isPaid ?? false,
       created_by: session.user.id,
@@ -85,6 +100,7 @@ export async function updateEventFinanceLine(
     amount: number
     recipient_admin_id: string
     transfer_from_admin_id: string | null
+    transfer_from_kind: TransferFromKind | null
     income_recipient_kind: IncomeRecipientKind | null
     is_paid: boolean
   }>,
@@ -95,6 +111,7 @@ export async function updateEventFinanceLine(
   if (patch.amount !== undefined) row.amount = patch.amount
   if (patch.recipient_admin_id !== undefined) row.recipient_admin_id = patch.recipient_admin_id
   if (patch.transfer_from_admin_id !== undefined) row.transfer_from_admin_id = patch.transfer_from_admin_id
+  if (patch.transfer_from_kind !== undefined) row.transfer_from_kind = patch.transfer_from_kind
   if (patch.income_recipient_kind !== undefined) row.income_recipient_kind = patch.income_recipient_kind
   if (patch.is_paid !== undefined) row.is_paid = patch.is_paid
   if (patch.person_name !== undefined) {

@@ -25,7 +25,7 @@ export function GuestListPasteBulk({
       </p>
       <p className="paste-bulk-hint" dir="rtl">
         הייבוא רץ בשרת. לזהויות חדשות עם טלפון תקין ותבנית WhatsApp מאושרת, נוצר תור שליחה ב־Supabase עם פיזור
-        בין דקה ל־10 דקות; Worker (Cron דקתי) מבצע את השליחה דרך Twilio.
+        של 3–7 שניות בין הודעות; Worker ברקע מבצע את השליחה דרך Twilio.
       </p>
       <figure className="paste-bulk-sample-wrap">
         <figcaption className="paste-bulk-sample-cap">דוגמאות</figcaption>

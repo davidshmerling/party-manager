@@ -1,5 +1,5 @@
 import type { AdminUserRow } from '../../types/admin'
-import type { EventFinanceLine, IncomeRecipientKind } from '../../types/finance'
+import type { EventFinanceLine, IncomeRecipientKind, TransferFromKind } from '../../types/finance'
 import type { EventRow } from '../../types/event'
 import type { Guest, ScanResponse } from '../../types/guest'
 import { normalizeCardTextField } from '../../utils/cardText'
@@ -100,7 +100,8 @@ export function mapEventRow(row: Record<string, unknown>): EventRow {
 function mapFinanceLineKind(raw: unknown): EventFinanceLine['line_kind'] {
   const s = raw != null && typeof raw === 'string' ? raw : ''
   if (s === 'expense') return 'expense'
-  if (s === 'selector_payout') return 'selector_payout'
+  if (s === 'internal_transfer') return 'internal_transfer'
+  if (s === 'selector_payout') return 'internal_transfer'
   return 'income'
 }
 
@@ -108,10 +109,15 @@ function mapIncomeRecipientKind(
   v: unknown,
   lineKind: EventFinanceLine['line_kind'],
 ): IncomeRecipientKind | null {
-  if (lineKind !== 'income') return null
   const s = v != null && typeof v === 'string' ? v : ''
   if (s === 'paybox' || s === 'partner' || s === 'selector') return s
-  return 'partner'
+  return lineKind === 'income' ? 'partner' : null
+}
+
+function mapTransferFromKind(v: unknown): TransferFromKind | null {
+  const s = v != null && typeof v === 'string' ? v : ''
+  if (s === 'paybox' || s === 'partner' || s === 'selector') return s
+  return null
 }
 
 export function mapEventFinanceLine(row: Record<string, unknown>): EventFinanceLine {
@@ -128,6 +134,7 @@ export function mapEventFinanceLine(row: Record<string, unknown>): EventFinanceL
     amount: Number.isFinite(amount) ? amount : 0,
     recipient_admin_id: String(row.recipient_admin_id),
     transfer_from_admin_id: tf != null && String(tf).trim() !== '' ? String(tf) : null,
+    transfer_from_kind: mapTransferFromKind(row.transfer_from_kind),
     income_recipient_kind: mapIncomeRecipientKind(row.income_recipient_kind, line_kind),
     is_paid: Boolean(row.is_paid),
     created_by: row.created_by != null ? String(row.created_by) : null,

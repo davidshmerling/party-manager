@@ -352,6 +352,137 @@ main.main:has(.guest-manage-page) {
   background: #f8fafc !important;
 }
 
+/* כרטיס מובייל — תוויות כמו כותרות הטבלה בדסקטופ */
+.guest-manage-page .guest-mob-compact__field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  margin-bottom: 0.28rem;
+}
+
+.guest-manage-page .guest-mob-compact__col-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #71717a;
+  letter-spacing: 0.01em;
+}
+
+.guest-manage-page .guest-mob-compact__phone--full {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* שם + פלאפון — שורה אחת */
+.guest-manage-page .guest-mob-compact__r-name-phone {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.4rem 0.55rem;
+  margin-bottom: 0.28rem;
+  min-width: 0;
+}
+
+.guest-manage-page .guest-mob-compact__name-phone-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.guest-manage-page .guest-mob-compact__name-phone-cell:first-child {
+  flex: 1 1 38%;
+  max-width: 48%;
+}
+
+.guest-manage-page .guest-mob-compact__name-phone-cell:last-child {
+  flex: 1 1 55%;
+}
+
+.guest-manage-page .guest-mob-compact__r2--phone-only {
+  margin-bottom: 0;
+}
+
+.guest-manage-page .guest-mob-compact__r-tickets {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  min-width: 0;
+  margin-top: 0.06rem;
+  padding-top: 0.18rem;
+  border-top: 1px solid #f1f5f9;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-manage-page .guest-mob-compact__r-tickets .guest-mob-compact__hint--inline {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.guest-manage-page .guest-mob-compact__r-tickets .guest-ticket-stepper {
+  flex-shrink: 0;
+}
+
+.guest-manage-page .guest-mob-compact__r-tickets-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.28rem 0.35rem;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  min-width: 0;
+}
+
+.guest-manage-page .guest-mob-compact__r-tickets .guest-mob-compact__chips--manage-strip {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.guest-manage-page .guest-mob-compact__tickets-readonly {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* כניסה + הזמנה — שורה אחת */
+.guest-manage-page .guest-mob-compact__r-manage-all {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.28rem 0.4rem;
+  min-width: 0;
+  margin-bottom: 0.1rem;
+  padding-top: 0.22rem;
+  border-top: 1px solid #f1f5f9;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-manage-page .guest-mob-compact__manage-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.guest-manage-page .guest-mob-compact__manage-cell--invite {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
 /* מחיר + למי שולם — שורה אחת בכרטיס מובייל בניהול אורחים */
 .guest-manage-page .guest-mob-compact__r-price-pay {
   display: flex;
@@ -383,12 +514,6 @@ main.main:has(.guest-manage-page) {
 .guest-manage-page .guest-mob-compact__r-price-pay select.guest-mob-compact__recipient-select {
   flex: 1 1 5.5rem;
   min-width: 0;
-}
-
-/* כניסה + כרטיס + הזמנה + אייקונים — שורה אחת, גלילה אופקית במסך צר */
-.guest-manage-page .guest-mob-compact__r3--manage-strip {
-  gap: 0;
-  margin-top: 0;
 }
 
 .guest-manage-page .guest-mob-compact__chips--manage-strip {
@@ -572,11 +697,14 @@ main.main:has(.guest-manage-page) {
   display: none;
 }
 
-/* סטטוס הזמנה segmented — מובייל */
-.guest-manage-page .guest-invite-seg--mob {
+/* כניסה + הזמנה — אותו רוחב חיצוני (לא מתיחת עמודת flex + max-width:100%) */
+.guest-manage-page .guest-invite-seg--mob,
+.guest-manage-page .guest-entry-seg--mob {
   flex: 0 0 auto;
-  min-width: 5.6rem;
-  max-width: 6.75rem;
+  width: 6.35rem;
+  min-width: 6.35rem;
+  max-width: 6.35rem;
+  box-sizing: border-box;
 }
 
 .guest-manage-page .guest-invite-seg--mob .guest-invite-seg__track {
@@ -586,16 +714,12 @@ main.main:has(.guest-manage-page) {
 
 .guest-manage-page .guest-invite-seg--mob .guest-invite-seg__cell {
   min-height: 30px;
-  padding: 0.1rem 0.04rem;
+  padding: 0.1rem 0.06rem;
 }
 
 .guest-manage-page .guest-invite-seg--mob .guest-invite-seg__glyph {
   font-size: 0.56rem;
   letter-spacing: -0.12em;
-}
-
-.guest-manage-page .guest-entry-seg--mob {
-  max-width: 5.1rem;
 }
 
 .guest-manage-page .guest-entry-seg--mob .guest-entry-seg__track {
@@ -604,7 +728,7 @@ main.main:has(.guest-manage-page) {
 
 .guest-manage-page .guest-entry-seg--mob .guest-entry-seg__cell {
   min-height: 30px;
-  padding: 0.1rem 0.04rem;
+  padding: 0.1rem 0.1rem;
 }
 
 .guest-manage-page .guest-entry-seg--mob .guest-entry-seg__glyph {

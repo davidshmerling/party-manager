@@ -1,7 +1,8 @@
-export type EventFinanceLineKind = 'income' | 'expense' | 'selector_payout'
+export type EventFinanceLineKind = 'income' | 'expense' | 'internal_transfer'
 
-/** נמען הכנסה: בריכת פייבוקס, שותף ישיר, או סלקטור (הוצאות: null) */
+/** שיוך גורם לשורה (income/expense): paybox / partner / selector; ב־internal_transfer נשאר null */
 export type IncomeRecipientKind = 'paybox' | 'partner' | 'selector'
+export type TransferFromKind = 'paybox' | 'partner' | 'selector'
 
 export type EventFinanceLine = {
   id: string
@@ -11,9 +12,11 @@ export type EventFinanceLine = {
   phone: string
   amount: number
   recipient_admin_id: string
-  /** ‎selector_payout‎: סלקטור שממנו יצא הכסף; אחרת ‎null */
+  /** ‎internal_transfer‎: מעביר; אחרת ‎null */
   transfer_from_admin_id: string | null
-  /** שורות הכנסה בלבד; null/חסר בנתונים ישן = ייחסו ל־partner ב־UI */
+  /** internal_transfer: מאפשר לסמן שמקור ההעברה הוא בריכת פייבוקס */
+  transfer_from_kind: TransferFromKind | null
+  /** income/expense: סוג גורם (למשל paybox); internal_transfer: null */
   income_recipient_kind: IncomeRecipientKind | null
   is_paid: boolean
   created_by: string | null

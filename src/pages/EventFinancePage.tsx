@@ -30,6 +30,7 @@ type PerAdminRow = {
   incomeCount: number
   expenseSum: number
   expenseCount: number
+  transferDelta: number
   net: number
 }
 
@@ -82,10 +83,10 @@ export function EventFinancePage() {
     recipient_admin_id: string
   } | null>(null)
 
-  const [payoutFromSelectorId, setPayoutFromSelectorId] = useState('')
-  const [payoutToPartnerId, setPayoutToPartnerId] = useState('')
+  const [payoutFromId, setPayoutFromId] = useState('')
+  const [payoutToId, setPayoutToId] = useState('')
   const [payoutAmount, setPayoutAmount] = useState('')
-  const [payoutNote, setPayoutNote] = useState('')
+  const [payoutReason, setPayoutReason] = useState('')
 
   const partnerOnlyRows = useMemo(
     () =>
@@ -98,24 +99,54 @@ export function EventFinancePage() {
     [eventStaff],
   )
 
-  const scannerPayoutOptions = useMemo(() => {
-    return scannerStaffForEvent
-      .map((s) => {
-        const u = admins.find((a) => a.user_id === s.user_id)
-        return {
-          userId: s.user_id,
-          label: u ? adminLabel(u) : s.email || s.user_id,
-        }
-      })
-      .sort((a, b) => a.label.localeCompare(b.label, 'he'))
-  }, [scannerStaffForEvent, admins])
+  const scannerStaffIdSet = useMemo(
+    () => new Set(scannerStaffForEvent.map((s) => s.user_id)),
+    [scannerStaffForEvent],
+  )
 
   /** כמו בניהול אורחים: נמען טכני לתשלומי «פייבוקס» — בפועל שותף אחד, ב־UI מוצג כישות «פייבוקס» */
   const payboxDelegateId = useMemo(() => {
-    if (partnerOnlyRows.length === 0) return null
-    const sorted = [...partnerOnlyRows].sort((a, b) => a.user_id.localeCompare(b.user_id))
-    return sorted[0]!.user_id
-  }, [partnerOnlyRows])
+    if (partnerOnlyRows.length > 0) {
+      const sortedPartners = [...partnerOnlyRows].sort((a, b) => a.user_id.localeCompare(b.user_id))
+      return sortedPartners[0]!.user_id
+    }
+    if (admins.length > 0) {
+      const sortedAdmins = [...admins].sort((a, b) => a.user_id.localeCompare(b.user_id))
+      return sortedAdmins[0]!.user_id
+    }
+    return null
+  }, [partnerOnlyRows, admins])
+
+  const fallbackPayboxDelegateId = useMemo(() => {
+    if (!payboxDelegateId) return null
+    const sortedAdmins = [...admins].sort((a, b) => a.user_id.localeCompare(b.user_id))
+    return sortedAdmins.find((a) => a.user_id !== payboxDelegateId)?.user_id ?? null
+  }, [admins, payboxDelegateId])
+
+  type InternalTransferParticipant = {
+    optionId: string
+    adminId: string
+    label: string
+  }
+
+  /** כל אדמין באירוע + פייבוקס (כישות נפרדת ב־UI) — להעברות מ־ / ל־ */
+  const internalTransferParticipants = useMemo(() => {
+    const seen = new Set<string>()
+    const rows: InternalTransferParticipant[] = []
+    function add(optionId: string, adminId: string, label: string) {
+      if (!optionId || !adminId || seen.has(optionId)) return
+      seen.add(optionId)
+      rows.push({ optionId, adminId, label })
+    }
+    for (const a of admins) {
+      add(a.user_id, a.user_id, adminLabel(a))
+    }
+    if (payboxDelegateId) {
+      add('paybox', payboxDelegateId, 'פייבוקס')
+    }
+    rows.sort((a, b) => a.label.localeCompare(b.label, 'he'))
+    return rows
+  }, [admins, payboxDelegateId])
 
   const dataErr = financeShellQuery.error
     ? financeShellQuery.error instanceof Error
@@ -124,40 +155,61 @@ export function EventFinancePage() {
     : null
   const displayError = error || dataErr
 
+  const expensePayerOptions = useMemo(() => {
+    const rows = partnerOnlyRows.map((a) => ({
+      optionId: a.user_id,
+      adminId: a.user_id,
+      label: adminLabel(a),
+    }))
+    if (payboxDelegateId) {
+      rows.push({ optionId: 'paybox', adminId: payboxDelegateId, label: 'פייבוקס' })
+    }
+    rows.sort((a, b) => a.label.localeCompare(b.label, 'he'))
+    return rows
+  }, [partnerOnlyRows, payboxDelegateId])
+
   useEffect(() => {
-    if (partnerOnlyRows.length === 0) return
+    if (expensePayerOptions.length === 0) {
+      setExpenseRecipient('')
+      return
+    }
     const u = user?.id
-    const ok = u && partnerOnlyRows.some((a) => a.user_id === u)
+    const ok = u && expensePayerOptions.some((a) => a.optionId === u)
     setExpenseRecipient((prev) => {
-      if (prev && partnerOnlyRows.some((a) => a.user_id === prev)) return prev
+      if (prev && expensePayerOptions.some((a) => a.optionId === prev)) return prev
       if (ok) return u!
-      return partnerOnlyRows[0]!.user_id
+      const firstNonPaybox = expensePayerOptions.find((a) => a.optionId !== 'paybox')
+      return (firstNonPaybox ?? expensePayerOptions[0])!.optionId
     })
-  }, [user?.id, partnerOnlyRows])
+  }, [user?.id, expensePayerOptions])
 
   useEffect(() => {
-    if (scannerPayoutOptions.length === 0) {
-      setPayoutFromSelectorId('')
+    if (internalTransferParticipants.length === 0) {
+      setPayoutFromId('')
       return
     }
-    setPayoutFromSelectorId((prev) =>
-      prev && scannerPayoutOptions.some((s) => s.userId === prev)
+    setPayoutFromId((prev) =>
+      prev && internalTransferParticipants.some((p) => p.optionId === prev)
         ? prev
-        : scannerPayoutOptions[0]!.userId,
+        : internalTransferParticipants[0]!.optionId,
     )
-  }, [scannerPayoutOptions])
+  }, [internalTransferParticipants])
 
   useEffect(() => {
-    if (partnerOnlyRows.length === 0) {
-      setPayoutToPartnerId('')
+    if (internalTransferParticipants.length < 2) {
+      setPayoutToId('')
       return
     }
-    setPayoutToPartnerId((prev) =>
-      prev && partnerOnlyRows.some((a) => a.user_id === prev)
-        ? prev
-        : partnerOnlyRows[0]!.user_id,
-    )
-  }, [partnerOnlyRows])
+    setPayoutToId((prev) => {
+      const okPrev =
+        prev &&
+        internalTransferParticipants.some((p) => p.optionId === prev) &&
+        prev !== payoutFromId
+      if (okPrev) return prev
+      const alt = internalTransferParticipants.find((p) => p.optionId !== payoutFromId)
+      return alt?.optionId ?? ''
+    })
+  }, [internalTransferParticipants, payoutFromId])
 
   useEffect(() => {
     if (!currentEvent) {
@@ -181,19 +233,38 @@ export function EventFinancePage() {
 
   const expenseLines = useMemo(() => lines.filter((l) => l.line_kind === 'expense'), [lines])
 
-  const selectorPayoutLines = useMemo(
-    () => lines.filter((l) => l.line_kind === 'selector_payout'),
+  const internalTransferLines = useMemo(
+    () => lines.filter((l) => l.line_kind === 'internal_transfer'),
     [lines],
+  )
+
+  const internalTransfersTotal = useMemo(
+    () => internalTransferLines.reduce((sum, l) => sum + l.amount, 0),
+    [internalTransferLines],
   )
 
   const perAdminRows: PerAdminRow[] = useMemo(() => {
     const partnerIdSet = new Set(partnerOnlyRows.map((a) => a.user_id))
     const partner = new Map<
       string,
-      { income: number; incomeCount: number; expense: number; expenseCount: number }
+      {
+        income: number
+        incomeCount: number
+        expense: number
+        expenseCount: number
+        transferIn: number
+        transferOut: number
+      }
     >()
     for (const a of partnerOnlyRows) {
-      partner.set(a.user_id, { income: 0, incomeCount: 0, expense: 0, expenseCount: 0 })
+      partner.set(a.user_id, {
+        income: 0,
+        incomeCount: 0,
+        expense: 0,
+        expenseCount: 0,
+        transferIn: 0,
+        transferOut: 0,
+      })
     }
     const selector = new Map<
       string,
@@ -202,33 +273,52 @@ export function EventFinancePage() {
         incomeCount: number
         expense: number
         expenseCount: number
+        transferIn: number
         payoutOut: number
       }
     >()
     const other = new Map<
       string,
-      { income: number; incomeCount: number; expense: number; expenseCount: number }
+      {
+        income: number
+        incomeCount: number
+        expense: number
+        expenseCount: number
+        transferIn: number
+        transferOut: number
+      }
     >()
     function ensure(
       m: Map<
         string,
-        { income: number; incomeCount: number; expense: number; expenseCount: number }
+        {
+          income: number
+          incomeCount: number
+          expense: number
+          expenseCount: number
+          transferIn: number
+          transferOut: number
+        }
       >,
       id: string,
     ) {
       if (!m.has(id)) {
-        m.set(id, { income: 0, incomeCount: 0, expense: 0, expenseCount: 0 })
+        m.set(id, { income: 0, incomeCount: 0, expense: 0, expenseCount: 0, transferIn: 0, transferOut: 0 })
       }
       return m.get(id)!
     }
     function ensureSelector(id: string) {
       if (!selector.has(id)) {
-        selector.set(id, { income: 0, incomeCount: 0, expense: 0, expenseCount: 0, payoutOut: 0 })
+        selector.set(id, { income: 0, incomeCount: 0, expense: 0, expenseCount: 0, transferIn: 0, payoutOut: 0 })
       }
       return selector.get(id)!
     }
     let payIncome = 0
     let payIC = 0
+    let payExpense = 0
+    let payEC = 0
+    let payTransferIn = 0
+    let payTransferOut = 0
     for (const l of lines) {
       if (l.line_kind === 'income') {
         if (l.income_recipient_kind === 'paybox') {
@@ -251,6 +341,11 @@ export function EventFinancePage() {
           }
         }
       } else if (l.line_kind === 'expense') {
+        if (l.income_recipient_kind === 'paybox') {
+          payExpense += l.amount
+          payEC += 1
+          continue
+        }
         const id = l.recipient_admin_id
         if (partnerIdSet.has(id) && partner.has(id)) {
           const c = partner.get(id)!
@@ -261,19 +356,39 @@ export function EventFinancePage() {
           c.expense += l.amount
           c.expenseCount += 1
         }
-      } else if (l.line_kind === 'selector_payout') {
+      } else if (l.line_kind === 'internal_transfer') {
+        const fromIsPaybox = l.transfer_from_kind === 'paybox'
+        const toIsPaybox = l.income_recipient_kind === 'paybox'
         const fromId = l.transfer_from_admin_id
         const toId = l.recipient_admin_id
-        if (fromId && partnerIdSet.has(toId)) {
-          const s = ensureSelector(fromId)
-          s.payoutOut += l.amount
-          const p = partner.get(toId)
-          if (p) p.income += l.amount
+        if ((!fromIsPaybox && !fromId) || !toId || (fromId === toId && !fromIsPaybox && !toIsPaybox)) continue
+        if (toIsPaybox) {
+          payTransferIn += l.amount
+          payIncome += l.amount
+          payIC += 1
+        } else if (partnerIdSet.has(toId) && partner.has(toId)) {
+          partner.get(toId)!.transferIn += l.amount
+          partner.get(toId)!.income += l.amount
+        } else if (scannerStaffIdSet.has(toId)) {
+          ensureSelector(toId).transferIn += l.amount
+          ensureSelector(toId).income += l.amount
+        } else {
+          ensure(other, toId).transferIn += l.amount
+          ensure(other, toId).income += l.amount
+        }
+        if (fromIsPaybox) {
+          payTransferOut += l.amount
+        } else if (fromId && scannerStaffIdSet.has(fromId)) {
+          ensureSelector(fromId).payoutOut += l.amount
+        } else if (fromId && partnerIdSet.has(fromId) && partner.has(fromId)) {
+          partner.get(fromId)!.transferOut += l.amount
+        } else if (fromId) {
+          ensure(other, fromId).transferOut += l.amount
         }
       }
     }
     const rows: PerAdminRow[] = []
-    if (payIC > 0) {
+    if (payIC > 0 || payEC > 0) {
       rows.push({
         key: 'income:paybox',
         rowKind: 'paybox',
@@ -281,14 +396,15 @@ export function EventFinancePage() {
         label: 'פייבוקס',
         incomeSum: payIncome,
         incomeCount: payIC,
-        expenseSum: 0,
-        expenseCount: 0,
-        net: payIncome,
+        expenseSum: payExpense,
+        expenseCount: payEC,
+        transferDelta: payTransferIn - payTransferOut,
+        net: payIncome - payExpense - payTransferOut,
       })
     }
     for (const a of partnerOnlyRows) {
       const v = partner.get(a.user_id)!
-      const net = v.income - v.expense
+      const net = v.income - v.expense - v.transferOut
       rows.push({
         key: `p:${a.user_id}`,
         rowKind: 'partner',
@@ -298,6 +414,7 @@ export function EventFinancePage() {
         incomeCount: v.incomeCount,
         expenseSum: v.expense,
         expenseCount: v.expenseCount,
+        transferDelta: v.transferIn - v.transferOut,
         net,
       })
     }
@@ -315,6 +432,7 @@ export function EventFinancePage() {
         incomeCount: v.incomeCount,
         expenseSum: v.expense,
         expenseCount: v.expenseCount,
+        transferDelta: v.transferIn - v.payoutOut,
         net: v.income - v.expense - v.payoutOut,
       })
     }
@@ -332,16 +450,21 @@ export function EventFinancePage() {
         incomeCount: v.incomeCount,
         expenseSum: v.expense,
         expenseCount: v.expenseCount,
-        net: v.income - v.expense,
+        transferDelta: v.transferIn - v.transferOut,
+        net: v.income - v.expense - v.transferOut,
       })
     }
     rows.sort((x, y) => x.label.localeCompare(y.label, 'he'))
     return rows
-  }, [lines, partnerOnlyRows, admins, payboxDelegateId])
+  }, [lines, partnerOnlyRows, admins, payboxDelegateId, scannerStaffIdSet])
 
-  const adminById = useCallback(
-    (id: string) => partnerOnlyRows.find((a) => a.user_id === id),
-    [partnerOnlyRows],
+  const expensePayerLabel = useCallback(
+    (line: EventFinanceLine) => {
+      if (line.income_recipient_kind === 'paybox') return 'פייבוקס'
+      const a = admins.find((x) => x.user_id === line.recipient_admin_id)
+      return a ? adminLabel(a) : `משתמש (${line.recipient_admin_id.slice(0, 8)}…)`
+    },
+    [admins],
   )
 
   const equalSplit = useMemo(() => {
@@ -361,6 +484,14 @@ export function EventFinancePage() {
     }
     return computeEqualizingTransfers(totals.net, partners, poolPayers)
   }, [totals.net, partnerOnlyRows, perAdminRows])
+
+  const partnerToPartnerTransferCount = useMemo(
+    () =>
+      equalSplit.equalizingTransfers.filter(
+        (t) => t.fromLabel !== EQUAL_SPLIT_PAYBOX_LABEL && t.toLabel !== EQUAL_SPLIT_PAYBOX_LABEL,
+      ).length,
+    [equalSplit.equalizingTransfers],
+  )
 
   const listDisabled = !currentEventId || eventLoading
 
@@ -383,6 +514,11 @@ export function EventFinancePage() {
 
   async function onAddExpense() {
     if (!currentEventId || !expenseRecipient || busy) return
+    const expensePayer = expensePayerOptions.find((p) => p.optionId === expenseRecipient)
+    if (!expensePayer) {
+      setError('נא לבחור מי משלם מהרשימה')
+      return
+    }
     const name = expenseLabel.trim()
     if (!name) {
       setError('נא למלא תיאור להוצאה')
@@ -399,7 +535,8 @@ export function EventFinancePage() {
         personName: name,
         phone: '',
         amount: amt,
-        recipientAdminId: expenseRecipient,
+        recipientAdminId: expensePayer.adminId,
+        incomeRecipientKind: expensePayer.optionId === 'paybox' ? 'paybox' : 'partner',
         isPaid: false,
       })
       syncFinanceLinesAcrossEventCaches(queryClient, currentEventId, (prev) => [line, ...prev])
@@ -440,14 +577,62 @@ export function EventFinancePage() {
     [admins],
   )
 
-  async function onAddSelectorPayout() {
+  const transferFromLabel = useCallback(
+    (line: EventFinanceLine) => {
+      if (line.transfer_from_kind === 'paybox') return 'פייבוקס'
+      const fromId = line.transfer_from_admin_id
+      return fromId ? adminDisplayById(fromId) : '—'
+    },
+    [adminDisplayById],
+  )
+
+  const transferToLabel = useCallback(
+    (line: EventFinanceLine) => {
+      if (line.income_recipient_kind === 'paybox') return 'פייבוקס'
+      return adminDisplayById(line.recipient_admin_id)
+    },
+    [adminDisplayById],
+  )
+
+  async function onAddInternalMoneyTransfer() {
     if (!currentEventId || busy) return
-    if (!payoutFromSelectorId || !payoutToPartnerId) {
-      setError('בחרו סלקטור ושותף מקבל')
+    if (!payoutFromId || !payoutToId) {
+      setError('נא לבחור מי מעביר ולמי')
       return
     }
-    if (!scannerPayoutOptions.some((s) => s.userId === payoutFromSelectorId)) {
-      setError('הסלקטור אינו מוגדר לאירוע')
+    if (payoutFromId === payoutToId) {
+      setError('לא ניתן להעביר לאותו אדם')
+      return
+    }
+    const fromParticipant = internalTransferParticipants.find((p) => p.optionId === payoutFromId)
+    const toParticipant = internalTransferParticipants.find((p) => p.optionId === payoutToId)
+    if (!fromParticipant || !toParticipant) {
+      setError('יש לבחור משתתפים מהרשימה')
+      return
+    }
+    if (fromParticipant.optionId === 'paybox' && toParticipant.optionId === 'paybox') {
+      setError('לא ניתן לבצע העברה מפייבוקס לפייבוקס')
+      return
+    }
+    let transferFromAdminId = fromParticipant.adminId
+    let recipientAdminId = toParticipant.adminId
+    if (fromParticipant.optionId === 'paybox' && transferFromAdminId === recipientAdminId) {
+      if (!fallbackPayboxDelegateId || fallbackPayboxDelegateId === recipientAdminId) {
+        setError('כדי להעביר מפייבוקס לאדמין הזה צריך לפחות אדמין נוסף באירוע')
+        return
+      }
+      transferFromAdminId = fallbackPayboxDelegateId
+    }
+    if (toParticipant.optionId === 'paybox' && transferFromAdminId === recipientAdminId) {
+      if (!fallbackPayboxDelegateId || fallbackPayboxDelegateId === transferFromAdminId) {
+        setError('כדי להעביר לאפשרות פייבוקס מאדמין הזה צריך לפחות אדמין נוסף באירוע')
+        return
+      }
+      recipientAdminId = fallbackPayboxDelegateId
+    }
+    const reason = payoutReason.trim()
+    if (!reason) {
+      setError('נא למלא סיבה להעברה')
       return
     }
     const raw = payoutAmount.trim().replace(',', '.')
@@ -461,17 +646,19 @@ export function EventFinancePage() {
     try {
       const line = await insertEventFinanceLine({
         eventId: currentEventId,
-        lineKind: 'selector_payout',
-        personName: payoutNote.trim() || 'העברה מסלקטור לשותף',
+        lineKind: 'internal_transfer',
+        personName: reason,
         phone: '',
         amount: amt,
-        recipientAdminId: payoutToPartnerId,
-        transferFromAdminId: payoutFromSelectorId,
+        recipientAdminId,
+        transferFromAdminId,
+        transferFromKind: fromParticipant.optionId === 'paybox' ? 'paybox' : undefined,
+        incomeRecipientKind: toParticipant.optionId === 'paybox' ? 'paybox' : undefined,
         isPaid: true,
       })
       syncFinanceLinesAcrossEventCaches(queryClient, currentEventId, (prev) => [line, ...prev])
       setPayoutAmount('')
-      setPayoutNote('')
+      setPayoutReason('')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'שגיאה')
     } finally {
@@ -479,7 +666,7 @@ export function EventFinancePage() {
     }
   }
 
-  async function onDeleteSelectorPayout(id: string) {
+  async function onDeleteInternalTransfer(id: string) {
     if (!window.confirm('למחוק רישום העברה זה?')) return
     setBusy(true)
     setError(null)
@@ -522,6 +709,7 @@ export function EventFinancePage() {
         phone: editDraft.phone,
         amount: Number.isFinite(amt) ? Math.abs(amt) : 0,
         recipient_admin_id: editDraft.recipient_admin_id,
+        income_recipient_kind: 'partner',
         is_paid: before?.is_paid ?? false,
       })
       syncFinanceLinesAcrossEventCaches(queryClient, currentEventId!, (prev) =>
@@ -596,6 +784,10 @@ export function EventFinancePage() {
           <span>
             <strong>מאזן:</strong> {formatNis(totals.net)}
           </span>
+          <span className="event-finance-snapshot__sep">|</span>
+          <span>
+            <strong>העברות פנימיות:</strong> {formatNis(internalTransfersTotal)}
+          </span>
         </div>
       ) : null}
 
@@ -616,6 +808,7 @@ export function EventFinancePage() {
                     <th className="guest-desk-th guest-desk-th--name">נמען / שותף</th>
                     <th className="guest-desk-th">הכנסות (מס׳ אורחים)</th>
                     <th className="guest-desk-th">הוצאות (מס׳ שורות)</th>
+                    <th className="guest-desk-th">העברות</th>
                     <th className="guest-desk-th">מאזן</th>
                   </tr>
                 </thead>
@@ -634,6 +827,13 @@ export function EventFinancePage() {
                         <span className="muted small">
                           {r.expenseCount > 0 ? ` · ‏${r.expenseCount} הוצאות` : ''}
                         </span>
+                      </td>
+                      <td className="guest-desk-td guest-desk-td--center">
+                        {r.transferDelta > 0.005
+                          ? `+${formatNis(r.transferDelta)}`
+                          : r.transferDelta < -0.005
+                            ? `-${formatNis(Math.abs(r.transferDelta))}`
+                            : '—'}
                       </td>
                       <td className="guest-desk-td guest-desk-td--center">
                         <strong>{formatNis(r.net)}</strong>
@@ -661,6 +861,14 @@ export function EventFinancePage() {
                   <div>
                     <strong>הוצאות:</strong> {formatNis(r.expenseSum)}
                     {r.expenseCount > 0 ? ` · ‏${r.expenseCount} שורות` : ' · 0'}
+                  </div>
+                  <div>
+                    <strong>העברות:</strong>{' '}
+                    {r.transferDelta > 0.005
+                      ? `+${formatNis(r.transferDelta)}`
+                      : r.transferDelta < -0.005
+                        ? `-${formatNis(Math.abs(r.transferDelta))}`
+                        : '—'}
                   </div>
                   <div>
                     <strong>מאזן:</strong> {formatNis(r.net)}
@@ -700,16 +908,16 @@ export function EventFinancePage() {
               />
             </div>
             <div>
-              <span className="guest-mob-label">מי (אדמין)</span>
+              <span className="guest-mob-label">מי משלם (אדמין / פייבוקס)</span>
               <select
                 className="guest-mob-input event-finance-select"
                 value={expenseRecipient}
                 onChange={(e) => setExpenseRecipient(e.target.value)}
-                disabled={listDisabled || partnerOnlyRows.length === 0}
+                disabled={listDisabled || expensePayerOptions.length === 0}
               >
-                {partnerOnlyRows.map((a) => (
-                  <option key={a.user_id} value={a.user_id}>
-                    {adminLabel(a)}
+                {expensePayerOptions.map((payer) => (
+                  <option key={payer.optionId} value={payer.optionId}>
+                    {payer.label}
                   </option>
                 ))}
               </select>
@@ -741,7 +949,6 @@ export function EventFinancePage() {
             <div className="guest-mob-list guest-list--mobile-only event-finance-mob">
               {expenseLines.map((l) => {
                 const isEdit = editingExpenseId === l.id
-                const a = adminById(l.recipient_admin_id)
                 return (
                   <div
                     key={l.id}
@@ -755,7 +962,7 @@ export function EventFinancePage() {
                         </div>
                         <div className="event-finance-card__meta event-finance-card__meta--expense-line muted small">
                           <span>
-                            <strong>מי שילם:</strong> {a ? adminLabel(a) : '—'}
+                            <strong>מי שילם:</strong> {expensePayerLabel(l)}
                           </span>
                           <span>
                             <strong>הערות:</strong> {l.phone?.trim() ? l.phone : '—'}
@@ -853,7 +1060,6 @@ export function EventFinancePage() {
                   <tbody>
                     {expenseLines.map((l) => {
                       const isEdit = editingExpenseId === l.id
-                      const a = adminById(l.recipient_admin_id)
                       return (
                         <tr key={l.id} className="guest-desk-tr">
                           {isEdit && editDraft ? (
@@ -912,7 +1118,7 @@ export function EventFinancePage() {
                             <>
                               <td className="guest-desk-td guest-desk-td--name">{l.person_name}</td>
                               <td className="guest-desk-td guest-desk-td--center">−{formatNis(l.amount)}</td>
-                              <td className="guest-desk-td guest-desk-td--center">{a ? adminLabel(a) : '—'}</td>
+                              <td className="guest-desk-td guest-desk-td--center">{expensePayerLabel(l)}</td>
                               <td className="guest-desk-td guest-desk-td--notes">
                                 {l.phone?.trim() ? l.phone : '—'}
                               </td>
@@ -943,47 +1149,50 @@ export function EventFinancePage() {
         )}
       </section>
 
-      <section className="guest-list-section" aria-labelledby="finance-selector-payout-heading">
-        <h2 id="finance-selector-payout-heading" className="sheet-section-title">
-          העברות מסלקטור לשותף
+      <section className="guest-list-section" aria-labelledby="finance-internal-transfer-heading">
+        <h2 id="finance-internal-transfer-heading" className="sheet-section-title">
+          העברות כסף (בין חברי צוות)
         </h2>
+        <p className="muted small" style={{ marginTop: '-0.35rem', marginBottom: '0.65rem' }}>
+          רישום העברה פנימית — לא משנה את סה״כ הכנסות/הוצאות של האירוע. מעדכן מאזן לפי שורה בסיכום למטה.
+        </p>
         <div className="guest-add-surface" style={{ marginBottom: '1rem' }}>
           <div className="event-finance-expense-add event-finance-payout-add">
             <div>
-              <span className="guest-mob-label">מסלקטור</span>
+              <span className="guest-mob-label">מ (מעביר)</span>
               <select
                 className="guest-mob-input event-finance-select"
-                value={payoutFromSelectorId}
-                onChange={(e) => setPayoutFromSelectorId(e.target.value)}
-                disabled={listDisabled || busy || scannerPayoutOptions.length === 0}
+                value={payoutFromId}
+                onChange={(e) => setPayoutFromId(e.target.value)}
+                disabled={listDisabled || busy || internalTransferParticipants.length === 0}
               >
-                {scannerPayoutOptions.length === 0 ? (
-                  <option value="">אין סלקטורים לאירוע</option>
+                {internalTransferParticipants.length === 0 ? (
+                  <option value="">אין משתתפים בצוות</option>
                 ) : null}
-                {scannerPayoutOptions.map((s) => (
-                  <option key={s.userId} value={s.userId}>
-                    {s.label}
+                {internalTransferParticipants.map((p) => (
+                  <option key={p.optionId} value={p.optionId}>
+                    {p.label}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <span className="guest-mob-label">לשותף (מקבל)</span>
+              <span className="guest-mob-label">ל (מקבל)</span>
               <select
                 className="guest-mob-input event-finance-select"
-                value={payoutToPartnerId}
-                onChange={(e) => setPayoutToPartnerId(e.target.value)}
-                disabled={listDisabled || busy || partnerOnlyRows.length === 0}
+                value={payoutToId}
+                onChange={(e) => setPayoutToId(e.target.value)}
+                disabled={listDisabled || busy || internalTransferParticipants.length < 2}
               >
-                {partnerOnlyRows.map((a) => (
-                  <option key={a.user_id} value={a.user_id}>
-                    {adminLabel(a)}
+                {internalTransferParticipants.map((p) => (
+                  <option key={p.optionId} value={p.optionId}>
+                    {p.label}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <span className="guest-mob-label">סכום שהועבר (₪)</span>
+              <span className="guest-mob-label">כמה (₪)</span>
               <input
                 className="guest-mob-input"
                 placeholder="0"
@@ -994,12 +1203,12 @@ export function EventFinancePage() {
               />
             </div>
             <div>
-              <span className="guest-mob-label">הערה (אופציונלי)</span>
+              <span className="guest-mob-label">סיבה (חובה)</span>
               <input
                 className="guest-mob-input"
-                placeholder="למשל דרך פייבוקס"
-                value={payoutNote}
-                onChange={(e) => setPayoutNote(e.target.value)}
+                placeholder="למשל החזר הוצאה, פייבוקס"
+                value={payoutReason}
+                onChange={(e) => setPayoutReason(e.target.value)}
                 disabled={listDisabled || busy}
               />
             </div>
@@ -1008,12 +1217,9 @@ export function EventFinancePage() {
                 type="button"
                 className="btn btn-mob btn-mob--primary guest-add-mob__btn"
                 disabled={
-                  listDisabled ||
-                  busy ||
-                  scannerPayoutOptions.length === 0 ||
-                  partnerOnlyRows.length === 0
+                  listDisabled || busy || internalTransferParticipants.length < 2 || !payoutFromId || !payoutToId
                 }
-                onClick={() => void onAddSelectorPayout()}
+                onClick={() => void onAddInternalMoneyTransfer()}
               >
                 שמור העברה
               </button>
@@ -1022,14 +1228,12 @@ export function EventFinancePage() {
         </div>
         {loading ? (
           <p className="muted">טוען…</p>
-        ) : selectorPayoutLines.length === 0 ? (
+        ) : internalTransferLines.length === 0 ? (
           <p className="muted">אין העברות מתועדות.</p>
         ) : (
           <>
             <div className="guest-mob-list guest-list--mobile-only event-finance-mob">
-              {selectorPayoutLines.map((l) => {
-                const fromId = l.transfer_from_admin_id
-                const toId = l.recipient_admin_id
+              {internalTransferLines.map((l) => {
                 return (
                   <div key={l.id} className="guest-mob-card guest-mob-card--compact event-finance-card">
                     <div className="guest-mob-card__title-row event-finance-card__r1">
@@ -1038,18 +1242,17 @@ export function EventFinancePage() {
                     </div>
                     <div className="event-finance-card__meta event-finance-card__meta--expense-line muted small">
                       <span>
-                        <strong>מסלקטור:</strong>{' '}
-                        {fromId ? adminDisplayById(fromId) : '—'}
+                        <strong>מ:</strong> {transferFromLabel(l)}
                       </span>
                       <span>
-                        <strong>לשותף:</strong> {adminDisplayById(toId)}
+                        <strong>ל:</strong> {transferToLabel(l)}
                       </span>
                     </div>
                     <div className="event-finance-card__actions">
                       <button
                         type="button"
                         className="btn btn-mob small"
-                        onClick={() => void onDeleteSelectorPayout(l.id)}
+                        onClick={() => void onDeleteInternalTransfer(l.id)}
                         disabled={busy}
                       >
                         מחק
@@ -1061,33 +1264,34 @@ export function EventFinancePage() {
             </div>
             <div className="guest-desk guest-list--desktop-only">
               <div className="sheet-wrap guest-desk-sheet-wrap">
-                <table className="sheet guest-desk-table event-finance-table">
+                <table
+                  className="sheet guest-desk-table event-finance-table"
+                  aria-label="העברות כסף פנימיות"
+                >
                   <thead>
                     <tr>
-                      <th className="guest-desk-th guest-desk-th--name">תיאור</th>
+                      <th className="guest-desk-th guest-desk-th--name">סיבה</th>
                       <th className="guest-desk-th">סכום</th>
-                      <th className="guest-desk-th">מסלקטור</th>
-                      <th className="guest-desk-th">לשותף</th>
+                      <th className="guest-desk-th">מ</th>
+                      <th className="guest-desk-th">ל</th>
                       <th className="guest-desk-th guest-desk-th--actions">פעולות</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {selectorPayoutLines.map((l) => {
-                      const fromId = l.transfer_from_admin_id
-                      const toId = l.recipient_admin_id
+                    {internalTransferLines.map((l) => {
                       return (
                         <tr key={l.id} className="guest-desk-tr">
                           <td className="guest-desk-td guest-desk-td--name">{l.person_name}</td>
                           <td className="guest-desk-td guest-desk-td--center">{formatNis(l.amount)}</td>
                           <td className="guest-desk-td guest-desk-td--center">
-                            {fromId ? adminDisplayById(fromId) : '—'}
+                            {transferFromLabel(l)}
                           </td>
-                          <td className="guest-desk-td guest-desk-td--center">{adminDisplayById(toId)}</td>
+                          <td className="guest-desk-td guest-desk-td--center">{transferToLabel(l)}</td>
                           <td className="guest-desk-td guest-desk-td--actions">
                             <button
                               type="button"
                               className="guest-desk-act guest-desk-act--del"
-                              onClick={() => void onDeleteSelectorPayout(l.id)}
+                              onClick={() => void onDeleteInternalTransfer(l.id)}
                               disabled={busy}
                             >
                               מחק
@@ -1116,7 +1320,7 @@ export function EventFinancePage() {
             </p>
             {partnerOnlyRows.length === 1 ? null : (
               <>
-                <h3 className="event-finance-equal-sub">העברות לאיזון</h3>
+                <h3 className="event-finance-equal-sub">העברות לאיזון (כולל שותף לשותף)</h3>
                 {equalSplit.transferCount === 0 ? (
                   <p className="muted">אין העברות.</p>
                 ) : (
@@ -1124,8 +1328,13 @@ export function EventFinancePage() {
                     <p className="event-finance-equal-count">
                       <strong>מספר הוראות:</strong> {equalSplit.transferCount}
                     </p>
+                    {partnerToPartnerTransferCount > 0 ? (
+                      <p className="event-finance-equal-count">
+                        <strong>מתוכן שותף לשותף:</strong> {partnerToPartnerTransferCount}
+                      </p>
+                    ) : null}
                     <ol className="event-finance-transfer-ol" dir="rtl">
-                      {equalSplit.payboxTransfers.map((t, idx) => (
+                      {equalSplit.equalizingTransfers.map((t, idx) => (
                         <li key={`${t.fromLabel}-${t.toLabel}-${idx}`}>
                           <strong>{t.fromLabel}</strong> צריך להעביר ל־<strong>{t.toLabel}</strong> —{' '}
                           {formatNis(t.amount)}

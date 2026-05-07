@@ -2,10 +2,7 @@ import { memo, useMemo, useState, type CSSProperties, type MouseEvent } from 're
 import type { Guest } from '../../types/guest'
 import {
   groupInviteSegment,
-  groupInviteThumbSegment,
-  isGuestDbNotSent,
-  memberInviteSegment,
-  type InviteSegmentGroup,
+  isGuestInviteSent,
   type InviteSegmentVisual,
 } from '../../utils/guestInviteSegment'
 
@@ -14,7 +11,7 @@ export type GuestInviteSentMarkButtonProps = {
   members: Guest[]
   saveInviteSent: (value: 'sent' | 'not_sent') => Promise<void>
   /**
-   * שינוי ידני (✗ / ✓✓ אפור) — מותר לשותף כשאין מצב mixed בקבוצה.
+   * שינוי ידני (✗ / ✓✓ אפור) — מותר לשותף כשיש כרטיסים בקבוצה.
    * כש־false — הכפתורים חסומים.
    */
   allowManualToggle?: boolean
@@ -26,18 +23,9 @@ function thumbIndex(seg: InviteSegmentVisual): number {
   return 2
 }
 
-function segmentTitle(
-  groupSeg: InviteSegmentGroup,
-  members: Guest[],
-  allowManual: boolean,
-): string {
+function segmentTitle(groupSeg: InviteSegmentVisual, allowManual: boolean): string {
   const perm =
-    'שינוי ידני — שותף בלבד; לא במצב מעורב. אחרי «נשלח»: אם טוויליו read או כרטיס נפתח — כחול אוטומטית.'
-  if (groupSeg === 'mixed') {
-    const ms = members.map(memberInviteSegment)
-    const n = (s: InviteSegmentVisual) => ms.filter((x) => x === s).length
-    return `מעורב: לא נשלח ${n('not_sent')}, נשלח ${n('sent')}, נצפה ${n('seen')}. ${perm}`
-  }
+    'שינוי ידני — שותף בלבד. קבוצה: אם כרטיס אחד נשלח — כולם אפור; אם אחד נצפה/read — כולם כחול.'
   if (groupSeg === 'not_sent') return `לא נשלח — ${perm}`
   if (groupSeg === 'sent') return `נשלח — נקרא/נפתח יתעדכן אוטומטית. ${perm}`
   return allowManual
@@ -54,13 +42,11 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
   const [busy, setBusy] = useState(false)
 
   const groupSeg = useMemo(() => groupInviteSegment(members), [members])
-  const thumbSeg = useMemo(() => groupInviteThumbSegment(groupSeg, members), [groupSeg, members])
 
-  const someDbNotSent = useMemo(() => members.some(isGuestDbNotSent), [members])
-  const someDbSent = useMemo(() => members.some((m) => !isGuestDbNotSent(m)), [members])
+  const someDbSent = useMemo(() => members.some(isGuestInviteSent), [members])
 
-  const title = segmentTitle(groupSeg, members, allowManualToggle)
-  const idx = thumbIndex(thumbSeg)
+  const title = segmentTitle(groupSeg, allowManualToggle)
+  const idx = thumbIndex(groupSeg)
 
   async function markNotSent(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
@@ -75,7 +61,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
 
   async function markSent(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
-    if (busy || !allowManualToggle || !someDbNotSent) return
+    if (busy || !allowManualToggle) return
     setBusy(true)
     try {
       await saveInviteSent('sent')
@@ -91,7 +77,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
 
   return (
     <div
-      className={`${rootClass} guest-invite-seg--thumb-${thumbSeg}${groupSeg === 'mixed' ? ' guest-invite-seg--mixed' : ''}${busy ? ' guest-invite-seg--busy' : ''}${!allowManualToggle ? ' guest-invite-seg--manual-locked' : ''}`}
+      className={`${rootClass} guest-invite-seg--thumb-${groupSeg}${busy ? ' guest-invite-seg--busy' : ''}${!allowManualToggle ? ' guest-invite-seg--manual-locked' : ''}`}
       style={{ '--thumb': idx } as CSSProperties}
       role="group"
       title={title}
@@ -113,7 +99,7 @@ export const GuestInviteSentMarkButton = memo(function GuestInviteSentMarkButton
         <button
           type="button"
           className="guest-invite-seg__cell guest-invite-seg__cell--tap"
-          disabled={busy || !allowManualToggle || !someDbNotSent}
+          disabled={busy || !allowManualToggle}
           aria-label="סמן נשלח (ידני)"
           onClick={(e) => void markSent(e)}
         >

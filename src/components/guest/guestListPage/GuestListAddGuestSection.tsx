@@ -18,6 +18,8 @@ type Props = {
   adminLabel: (a: AdminUserRow) => string
   newGuestPrice: string
   setNewGuestPrice: (v: string) => void
+  newGuestQuantity: string
+  setNewGuestQuantity: (v: string) => void
   listDisabled: boolean
   onAdd: () => void | Promise<void>
 }
@@ -37,6 +39,8 @@ export function GuestListAddGuestSection({
   adminLabel,
   newGuestPrice,
   setNewGuestPrice,
+  newGuestQuantity,
+  setNewGuestQuantity,
   listDisabled,
   onAdd,
 }: Props) {
@@ -47,6 +51,8 @@ export function GuestListAddGuestSection({
   const phoneE164 = formatIsraelMobileE164(newPhone)
   const phoneShowError = newPhone.trim() !== '' && phoneE164 === null
   const phoneBlocksSubmit = phoneE164 === null
+  const quantityParsed = Number(newGuestQuantity)
+  const quantityValid = Number.isInteger(quantityParsed) && quantityParsed > 0
   return (
     <section className="guest-add-section" id="guest-add-panel" aria-labelledby="guest-add-heading">
       <div className="guest-add-surface">
@@ -135,11 +141,27 @@ export function GuestListAddGuestSection({
               aria-label="מחיר כרטיס בשקלים"
             />
           </div>
+          <div className="guest-add-field">
+            <span className="guest-mob-label">כמות אנשים</span>
+            <input
+              className={`guest-mob-input${newGuestQuantity.trim() !== '' && !quantityValid ? ' guest-mob-input--field-error' : ''}`}
+              placeholder="כמות"
+              inputMode="numeric"
+              type="number"
+              min={1}
+              step={1}
+              value={newGuestQuantity}
+              onChange={(e) => setNewGuestQuantity(e.target.value)}
+              disabled={listDisabled}
+              aria-label="כמות אנשים להוספה"
+              aria-invalid={newGuestQuantity.trim() !== '' && !quantityValid}
+            />
+          </div>
           <div className="guest-add-form__btn-wrap">
             <button
               type="button"
               className="btn btn-mob btn-mob--primary guest-add-mob__btn guest-add-mob__btn--primary guest-add-cta"
-              disabled={listDisabled || !canSubmitRecipient || phoneBlocksSubmit}
+              disabled={listDisabled || !canSubmitRecipient || phoneBlocksSubmit || !quantityValid}
               onClick={() => void onAdd()}
             >
               הוסף אורח
