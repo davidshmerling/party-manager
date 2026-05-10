@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 
 export type RecipientFilterOption = { value: string; label: string }
 
-export type GuestInviteFilterMode = 'all' | 'unsent' | 'sent'
+/** מחולק לפי קבוצת זהות: נקרא > נשלח ולא נפתח > לא נשלח */
+export type GuestInviteFilterMode = 'all' | 'unsent' | 'sent' | 'opened'
 export type GuestEntryFilterMode = 'all' | 'entered' | 'pending'
 
 type Props = {
@@ -60,7 +61,7 @@ export function GuestListSearchFilters({
         <header className="guest-filters-card-header">
           <h3 className="guest-filters-card-title">חיפוש וסינון</h3>
           <p className="guest-filters-card-desc">
-            מצא אורחים לפי שם, טלפון, סטטוס כניסה או הזמנה
+            מצא אורחים לפי שם, טלפון, מעקב הזמנה (נשלח / נקרא) או סטטוס כניסה
           </p>
         </header>
 
@@ -159,7 +160,7 @@ export function GuestListSearchFilters({
 
             <div className="guest-filters-field">
               <label className="guest-filters-field__label" htmlFor="guest-filter-invite">
-                סטטוס הזמנה
+                מעקב הזמנה
               </label>
               <select
                 id="guest-filter-invite"
@@ -169,8 +170,9 @@ export function GuestListSearchFilters({
                 disabled={listDisabled || !canInviteFilter}
               >
                 <option value="all">כל האורחים</option>
-                <option value="unsent">לא נשלחה הזמנה</option>
-                <option value="sent">נשלחה הזמנה</option>
+                <option value="unsent">לא נשלח</option>
+                <option value="sent">נשלח (טרם נפתח כרטיס)</option>
+                <option value="opened">נקרא (נפתח כרטיס)</option>
               </select>
             </div>
 

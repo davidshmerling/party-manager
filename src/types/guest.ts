@@ -68,9 +68,11 @@ export interface SendGuestTwilioSuccess {
 export type BulkImportGuestsResult = {
   ok: boolean
   added: number
+  /** תמיד 0 — כפילות שורה ברשימה יוצרת כרטיס נוסף, לא דילוג */
   skipped: number
   /** שורות עם מספר שאינו נייד ישראלי תקין — לא נשמרו ב־DB */
   skippedInvalidPhone: number
+  /** תמיד 0 — אין תור שליחה אוטומטי אחרי ייבוא */
   queuedForWhatsapp: number
   errors: string[]
   createdGuests: Guest[]

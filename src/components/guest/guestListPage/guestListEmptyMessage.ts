@@ -1,4 +1,4 @@
-export type GuestInviteFilter = 'all' | 'unsent' | 'sent'
+export type GuestInviteFilter = 'all' | 'unsent' | 'sent' | 'opened'
 export type GuestEntryFilter = 'all' | 'entered' | 'pending'
 
 export function getGuestListEmptyMessage(args: {
@@ -12,7 +12,7 @@ export function getGuestListEmptyMessage(args: {
     return 'נסה לשנות את החיפוש או לנקות מסננים.'
   }
   if (args.guestInviteFilter !== 'all' && args.sortedGroupedRowsLength > 0) {
-    return 'אין אורחים לפי סינון סטטוס ההזמנה. נסו «כל האורחים» או סינון אחר.'
+    return 'אין אורחים לפי סינון מעקב ההזמנה. נסו «כל האורחים» או סינון אחר.'
   }
   if (args.guestEntryFilter !== 'all' && args.sortedGroupedRowsLength > 0) {
     return 'אין אורחים לפי סינון סטטוס הכניסה. נסו «כל האורחים» או סינון אחר.'

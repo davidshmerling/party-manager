@@ -24,8 +24,7 @@ export function GuestListPasteBulk({
         שותף או המילה פייבוקס / סלקטור), <strong>סכום</strong>.
       </p>
       <p className="paste-bulk-hint" dir="rtl">
-        הייבוא רץ בשרת. לזהויות חדשות עם טלפון תקין ותבנית WhatsApp מאושרת, נוצר תור שליחה ב־Supabase עם פיזור
-        של 3–7 שניות בין הודעות; Worker ברקע מבצע את השליחה דרך Twilio.
+        הייבוא רץ בשרת. שורה זהה פעמיים ברשימה נחשבת לשני כרטיסים לאותה זהות (אותו צמד שם וטלפון).
       </p>
       <figure className="paste-bulk-sample-wrap">
         <figcaption className="paste-bulk-sample-cap">דוגמאות</figcaption>

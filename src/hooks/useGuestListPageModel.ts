@@ -94,7 +94,9 @@ export function useGuestListPageModel() {
   /** מיון קבוצות: שם, זמן כניסה לפארטי, או created_at (הוספה לרשימה) */
   const [guestSortMode, setGuestSortMode] = useState<'name' | 'entry_time' | 'added_at'>('name')
   /** סינון לפי סטטוס שליחת הזמנה בוואטסאפ */
-  const [guestInviteFilter, setGuestInviteFilter] = useState<'all' | 'unsent' | 'sent'>('all')
+  const [guestInviteFilter, setGuestInviteFilter] = useState<
+    'all' | 'unsent' | 'sent' | 'opened'
+  >('all')
   /** סינון לפי כניסה לפארטי (לפי זהות/קבוצת כרטיסים) */
   const [guestEntryFilter, setGuestEntryFilter] = useState<'all' | 'entered' | 'pending'>('all')
   const [guestSearchQuery, setGuestSearchQuery] = useState('')
@@ -550,13 +552,17 @@ export function useGuestListPageModel() {
 
   const displayedGroupedRows = useMemo(() => {
     let rows = sortedGroupedRows
-    if (guestInviteFilter === 'unsent') {
-      rows = rows.filter((members) =>
-        members.some((m) => m.whatsapp_invite_sent_at == null),
-      )
+    if (guestInviteFilter === 'opened') {
+      rows = rows.filter((members) => members.some((m) => m.card_opened_at != null))
     } else if (guestInviteFilter === 'sent') {
+      rows = rows.filter(
+        (members) =>
+          !members.some((m) => m.card_opened_at != null) &&
+          members.some((m) => m.whatsapp_invite_sent_at != null),
+      )
+    } else if (guestInviteFilter === 'unsent') {
       rows = rows.filter((members) =>
-        members.some((m) => m.whatsapp_invite_sent_at != null),
+        !members.some((m) => m.whatsapp_invite_sent_at != null),
       )
     }
     if (guestEntryFilter === 'entered') {
@@ -1172,21 +1178,9 @@ export function useGuestListPageModel() {
           result.added === 1 ? 'נוסף כרטיס אחד' : `נוספו ${result.added} כרטיסים`,
         )
       }
-      if (result.skipped > 0) {
-        parts.push(
-          result.skipped === 1 ? 'שורה כפולה דולגה' : `דולגו ${result.skipped} שורות כפולות`,
-        )
-      }
       if (result.skippedInvalidPhone > 0) {
         parts.push(
           `${result.skippedInvalidPhone} שורות לא נוספו בגלל מספר טלפון לא תקין`,
-        )
-      }
-      if (result.queuedForWhatsapp > 0) {
-        parts.push(
-          result.queuedForWhatsapp === 1
-            ? 'הוזמנה שליחת WhatsApp אחת לתור (3–7 שניות בין הודעות)'
-            : `${result.queuedForWhatsapp} הזמנות בוצעו לתור WhatsApp (פיזור של 3–7 שניות בין הודעות)`,
         )
       }
       if (parts.length === 0) {
@@ -1271,13 +1265,21 @@ export function useGuestListPageModel() {
     )
     if (!inDisplayed) {
       const anyInviteSent = best.some((m) => m.whatsapp_invite_sent_at != null)
+      const anyCardOpened = best.some((m) => m.card_opened_at != null)
       const allEnteredRow = best.every((m) => m.status === 'entered')
       let notice = false
-      if (guestInviteFilter === 'unsent' && anyInviteSent) {
+      if (guestInviteFilter === 'opened' && !anyCardOpened) {
         setGuestInviteFilter('all')
         notice = true
       }
-      if (guestInviteFilter === 'sent' && !anyInviteSent) {
+      if (
+        guestInviteFilter === 'sent' &&
+        (anyCardOpened || !anyInviteSent)
+      ) {
+        setGuestInviteFilter('all')
+        notice = true
+      }
+      if (guestInviteFilter === 'unsent' && anyInviteSent) {
         setGuestInviteFilter('all')
         notice = true
       }

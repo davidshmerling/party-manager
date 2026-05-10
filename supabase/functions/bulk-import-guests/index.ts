@@ -1,11 +1,10 @@
 /**
- * ייבוא מרוכז אורחים מהטקסט שהודבק — פרסור, ולידציה, DB, תור WhatsApp.
+ * ייבוא מרוכז אורחים מהטקסט שהודבק — פרסור, ולידציה, DB.
  * POST JSON: { eventId, text }
  * Authorization: Bearer <JWT>
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
 import { formatIsraelMobileE164 } from '../_shared/formatIsraelMobileE164.ts'
-import { twilioTemplateMeetsApprovalGate } from '../_shared/twilioInviteSend.ts'
 
 const GUEST_SELECT =
   'id, event_id, name, phone, source, unique_code, invite_bundle_code, status, entered_at, card_opened_at, whatsapp_invite_sent_at, invite_sent_method, whatsapp_last_inbound_at, whatsapp_invite_twilio_sid, whatsapp_invite_twilio_status, created_at, updated_at'
@@ -204,35 +203,9 @@ Deno.serve(async (req: Request) => {
 
   const adminRows = admins as unknown as AdminRow[]
 
-  const { data: evRow } = await userSb
-    .from('events')
-    .select(
-      'whatsapp_twilio_content_sid, whatsapp_twilio_content_status, whatsapp_twilio_placeholder_slots',
-    )
-    .eq('id', eventId)
-    .maybeSingle()
-
-  const rawSlots = evRow?.whatsapp_twilio_placeholder_slots
-  const placeholderSlots = Array.isArray(rawSlots)
-    ? rawSlots.map((x) => Number(x)).filter((n) => Number.isFinite(n) && n >= 1 && n <= 9)
-    : []
-  const contentSidRaw =
-    evRow?.whatsapp_twilio_content_sid != null
-      ? String(evRow.whatsapp_twilio_content_sid).trim()
-      : ''
-  const templateApproved = twilioTemplateMeetsApprovalGate(
-    contentSidRaw,
-    placeholderSlots,
-    evRow?.whatsapp_twilio_content_status != null
-      ? String(evRow.whatsapp_twilio_content_status)
-      : null,
-  )
-
   const rawLines = text.split(/\r?\n/)
   const errors: string[] = []
-  let skipped = 0
   let skippedInvalidPhone = 0
-  const seenNormLine = new Set<string>()
   type WorkRow = { displayNum: number; parsed: ParsedLine; linePreview: string }
   const work: WorkRow[] = []
 
@@ -240,12 +213,6 @@ Deno.serve(async (req: Request) => {
   for (let i = 0; i < rawLines.length; i++) {
     const raw = rawLines[i]!
     if (!raw.trim()) continue
-    const norm = raw.trim().replace(/\s+/g, ' ')
-    if (seenNormLine.has(norm)) {
-      skipped++
-      continue
-    }
-    seenNormLine.add(norm)
     displayLineNum += 1
     const parsed = parseGuestBulkFinanceLine(raw.trim())
     if (!parsed) {
@@ -293,7 +260,7 @@ Deno.serve(async (req: Request) => {
     return json({
       ok: false as const,
       added: 0,
-      skipped,
+      skipped: 0,
       skippedInvalidPhone,
       queuedForWhatsapp: 0,
       errors,
@@ -306,7 +273,7 @@ Deno.serve(async (req: Request) => {
     return json({
       ok: true as const,
       added: 0,
-      skipped,
+      skipped: 0,
       skippedInvalidPhone,
       queuedForWhatsapp: 0,
       errors: [],
@@ -317,7 +284,6 @@ Deno.serve(async (req: Request) => {
 
   const createdGuests: Record<string, unknown>[] = []
   const financeLinesCreated: Record<string, unknown>[] = []
-  const queueGuestIds: string[] = []
   let added = 0
 
   for (const w of work) {
@@ -340,7 +306,6 @@ Deno.serve(async (req: Request) => {
         siblingBundle != null && String(siblingBundle).trim()
           ? String(siblingBundle).trim()
           : null
-      const wasFirstIdentityTicket = bundle == null
 
       let guest: Record<string, unknown> | null = null
       let lastInsErr: { code?: string; message: string } | null = null
@@ -403,50 +368,18 @@ Deno.serve(async (req: Request) => {
 
       createdGuests.push(guest)
       if (fin) financeLinesCreated.push(fin as Record<string, unknown>)
-
-      if (
-        wasFirstIdentityTicket &&
-        templateApproved &&
-        String(guest.source ?? 'list') !== 'pay_at_door'
-      ) {
-        queueGuestIds.push(guestId)
-      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'שגיאה'
       errors.push(`שורה ${w.displayNum}: ${msg}`)
     }
   }
 
-  let queuedForWhatsapp = 0
-  if (queueGuestIds.length > 0) {
-    let nextAt = Date.now()
-    const rows = queueGuestIds.map((guest_id) => {
-      // רצף שליחה אמיתי: כל הודעה מתוזמנת 3-7 שניות אחרי הקודמת.
-      const delaySec = 3 + Math.floor(Math.random() * 5)
-      nextAt += delaySec * 1000
-      const sendAfter = new Date(nextAt).toISOString()
-      return {
-        event_id: eventId,
-        guest_id,
-        status: 'pending' as const,
-        attempts: 0,
-        send_after: sendAfter,
-      }
-    })
-    const { error: qErr } = await userSb.from('whatsapp_send_queue').insert(rows)
-    if (qErr) {
-      errors.push(`תור WhatsApp: ${qErr.message}`)
-    } else {
-      queuedForWhatsapp = rows.length
-    }
-  }
-
   return json({
     ok: errors.length === 0,
     added,
-    skipped,
+    skipped: 0,
     skippedInvalidPhone,
-    queuedForWhatsapp,
+    queuedForWhatsapp: 0,
     errors,
     createdGuests,
     financeLinesCreated,
