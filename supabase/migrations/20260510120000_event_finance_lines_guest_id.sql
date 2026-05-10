@@ -14,7 +14,9 @@ CREATE INDEX IF NOT EXISTS idx_event_finance_lines_income_guest
 UPDATE public.event_finance_lines l
 SET guest_id = s.guest_id
 FROM (
-  SELECT l2.id AS line_id, min(g.id) AS guest_id
+  SELECT
+    l2.id AS line_id,
+    (array_agg(g.id ORDER BY g.created_at ASC, g.id ASC))[1] AS guest_id
   FROM public.event_finance_lines l2
   INNER JOIN public.guests g
     ON g.event_id = l2.event_id
