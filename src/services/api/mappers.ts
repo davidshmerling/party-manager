@@ -125,10 +125,12 @@ export function mapEventFinanceLine(row: Record<string, unknown>): EventFinanceL
   const amount = typeof a === 'number' ? a : Number(a ?? 0)
   const line_kind = mapFinanceLineKind(row.line_kind)
   const tf = row.transfer_from_admin_id
+  const gid = row.guest_id
   return {
     id: String(row.id),
     event_id: String(row.event_id),
     line_kind,
+    guest_id: gid != null && String(gid).trim() !== '' ? String(gid) : null,
     person_name: String(row.person_name ?? '').trim() || '—',
     phone: String(row.phone ?? ''),
     amount: Number.isFinite(amount) ? amount : 0,

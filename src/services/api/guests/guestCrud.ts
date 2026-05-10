@@ -79,6 +79,7 @@ export async function createGuest(
           const line = await insertEventFinanceLine({
             eventId,
             lineKind: 'income',
+            guestId: guest.id,
             personName: n,
             phone: p,
             amount: typeof amt === 'number' && Number.isFinite(amt) ? amt : 0,
@@ -161,7 +162,7 @@ export async function deleteGuest(id: string): Promise<void> {
 /** אחרי הסרה מהרשימה: מוחק שורות הכנסה (אורח) אם אין עוד אורח פעיל עם אותו שם+פלאפון באירוע */
 async function cleanupOrphanGuestIncomeLines(
   client: ReturnType<typeof sb>,
-  removed: { event_id: string; name: string; phone: string }[],
+  removed: { id: string; event_id: string; name: string; phone: string }[],
 ): Promise<void> {
   if (removed.length === 0) return
   const byEvent = new Set(removed.map((r) => r.event_id))
@@ -180,14 +181,28 @@ async function cleanupOrphanGuestIncomeLines(
       const k = guestIdentityKey(r.name, r.phone)
       if (still.has(k) || seen.has(k)) continue
       seen.add(k)
-      const { error } = await client
+      const removedIds = removed
+        .filter((x) => x.event_id === eventId && guestIdentityKey(x.name, x.phone) === k)
+        .map((x) => x.id)
+        .filter(Boolean)
+      if (removedIds.length > 0) {
+        const { error: e1 } = await client
+          .from('event_finance_lines')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('line_kind', 'income')
+          .in('guest_id', removedIds)
+        if (e1) throw new Error(errMsg(e1))
+      }
+      const { error: e2 } = await client
         .from('event_finance_lines')
         .delete()
         .eq('event_id', eventId)
         .eq('line_kind', 'income')
         .eq('person_name', r.name.trim())
         .eq('phone', r.phone.trim())
-      if (error) throw new Error(errMsg(error))
+        .is('guest_id', null)
+      if (e2) throw new Error(errMsg(e2))
     }
   }
 }
@@ -219,6 +234,11 @@ export async function deleteGuestsByIds(ids: string[]): Promise<void> {
   }
   await cleanupOrphanGuestIncomeLines(
     client,
-    toRemove.map((r) => ({ event_id: r.event_id, name: r.name, phone: r.phone })),
+    toRemove.map((r) => ({
+      id: r.id,
+      event_id: r.event_id,
+      name: r.name,
+      phone: r.phone,
+    })),
   )
 }

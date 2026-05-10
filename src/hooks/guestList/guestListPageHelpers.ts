@@ -1,5 +1,6 @@
+import type { EventFinanceLine } from '../../types/finance'
 import type { Guest } from '../../types/guest'
-import { guestGroupKey } from '../../utils/guestIdentity'
+import { guestGroupKey, guestIdentityKey } from '../../utils/guestIdentity'
 
 /** מיון כמו `fetchGuests`: name, אז created_at */
 export function sortGuestsLikeFetch(guests: Guest[]): Guest[] {
@@ -36,4 +37,22 @@ export function errStr(e: unknown): string {
 export function guestSnapshotAffectsPartyStats(before: Guest | undefined, after: Guest): boolean {
   if (!before) return true
   return before.status !== after.status || before.entered_at !== after.entered_at
+}
+
+/** שורות הכנסה המשויכות לקבוצת כרטיסים (לפי guest_id; נפילה לשם+טלפון לשורות ישנות בלי guest_id) */
+export function incomeLinesForGuestGroup(
+  lines: readonly EventFinanceLine[],
+  members: Pick<Guest, 'id' | 'name' | 'phone'>[],
+): EventFinanceLine[] {
+  if (members.length === 0) return []
+  const memberIds = new Set(members.map((m) => m.id))
+  const k = guestIdentityKey(members[0]!.name, members[0]!.phone)
+  return lines.filter((l) => {
+    if (l.line_kind !== 'income') return false
+    if (l.guest_id != null && l.guest_id !== '' && memberIds.has(l.guest_id)) return true
+    if (l.guest_id == null || l.guest_id === '') {
+      return guestIdentityKey(l.person_name, l.phone) === k
+    }
+    return false
+  })
 }

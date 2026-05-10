@@ -8,6 +8,8 @@ export type EventFinanceLine = {
   id: string
   event_id: string
   line_kind: EventFinanceLineKind
+  /** שורת הכנסה מקושרת לכרטיס אורח; null = לא משויך או נתונים לפני השדה */
+  guest_id: string | null
   person_name: string
   phone: string
   amount: number

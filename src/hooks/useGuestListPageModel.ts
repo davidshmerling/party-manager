@@ -26,7 +26,7 @@ import {
   updateCachedPartyShellFinanceLines,
   updateCachedPartyShellGuests,
 } from '../lib/partyEventQueries'
-import { groupGuestsByIdentity, guestGroupKey, guestIdentityKey } from '../utils/guestIdentity'
+import { groupGuestsByIdentity, guestGroupKey } from '../utils/guestIdentity'
 import { findBestGuestGroupMatch, guestRowAnchorId, scoreGuestSearch } from '../utils/guestListSearch'
 import { formatIsraelMobileE164 } from '../utils/formatIsraelMobileE164'
 import type { IncomeRecipientEditOption } from '../components/guest/IncomeRecipientSelect'
@@ -34,6 +34,7 @@ import {
   adminLabel,
   errStr,
   guestSnapshotAffectsPartyStats,
+  incomeLinesForGuestGroup,
   RECIPIENT_SEL_PREFIX,
   sortGuestsLikeFetch,
 } from './guestList/guestListPageHelpers'
@@ -320,10 +321,8 @@ export function useGuestListPageModel() {
 
   const incomeMetaForMembers = useCallback(
     (members: Guest[]) => {
-      const g = members[0]!
-      const k = guestIdentityKey(g.name, g.phone)
-      const matches = financeLines.filter(
-        (l) => l.line_kind === 'income' && guestIdentityKey(l.person_name, l.phone) === k,
+      const matches = incomeLinesForGuestGroup(financeLines, members).sort((a, b) =>
+        a.created_at.localeCompare(b.created_at),
       )
       if (matches.length === 0) {
         return {
@@ -595,18 +594,10 @@ export function useGuestListPageModel() {
     const selectorFilterId = isSelectorF ? filterAdminId.slice(RECIPIENT_SEL_PREFIX.length) : null
 
     const income = financeLines.filter((l) => l.line_kind === 'income')
-    const byIdentity = new Map<string, EventFinanceLine[]>()
-    for (const l of income) {
-      const gk = guestIdentityKey(l.person_name, l.phone)
-      const arr = byIdentity.get(gk) ?? []
-      arr.push(l)
-      byIdentity.set(gk, arr)
-    }
     return displayedGroupedRows.filter((members) => {
       const g = members[0]!
       if (g.source === 'pay_at_door') return false
-      const gk2 = guestIdentityKey(g.name, g.phone)
-      const mlines = byIdentity.get(gk2) ?? []
+      const mlines = incomeLinesForGuestGroup(income, members)
       if (mlines.length === 0) return false
       return mlines.some((l) => {
         if (isPayboxF) {
@@ -958,13 +949,9 @@ export function useGuestListPageModel() {
       try {
         const name = g0.name.trim()
         const phone = g0.phone.trim()
-        const idKey = guestIdentityKey(name, phone)
-        const existingIncome = financeLines
-          .filter(
-            (l) =>
-              l.line_kind === 'income' && guestIdentityKey(l.person_name, l.phone) === idKey,
-          )
-          .sort((a, b) => a.created_at.localeCompare(b.created_at))
+        const existingIncome = incomeLinesForGuestGroup(financeLines, members).sort((a, b) =>
+          a.created_at.localeCompare(b.created_at),
+        )
         const template = existingIncome[0]
         const rk = template?.income_recipient_kind
         const incomeRecipientKind: IncomeRecipientKind =

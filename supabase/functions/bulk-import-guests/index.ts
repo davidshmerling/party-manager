@@ -10,7 +10,7 @@ const GUEST_SELECT =
   'id, event_id, name, phone, source, unique_code, invite_bundle_code, status, entered_at, card_opened_at, whatsapp_invite_sent_at, invite_sent_method, whatsapp_last_inbound_at, whatsapp_invite_twilio_sid, whatsapp_invite_twilio_status, created_at, updated_at'
 
 const FINANCE_SELECT =
-  'id, event_id, line_kind, person_name, phone, amount, recipient_admin_id, transfer_from_admin_id, income_recipient_kind, is_paid, created_by, created_at, updated_at'
+  'id, event_id, line_kind, guest_id, person_name, phone, amount, recipient_admin_id, transfer_from_admin_id, income_recipient_kind, is_paid, created_by, created_at, updated_at'
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -348,6 +348,7 @@ Deno.serve(async (req: Request) => {
         .insert({
           event_id: eventId,
           line_kind: 'income',
+          guest_id: guestId,
           person_name: n.trim(),
           phone: p.trim(),
           amount,
