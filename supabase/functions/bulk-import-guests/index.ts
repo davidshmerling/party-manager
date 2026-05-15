@@ -28,8 +28,13 @@ function json(body: unknown, status: number): Response {
 
 type ParsedLine = { name: string; phone: string; adminToken: string; amount: number }
 
+/** כמו הקלט ל־parseGuestBulkFinanceLine (טאבים → רווח, trim) */
+function normalizePasteLine(line: string): string {
+  return line.replace(/\t/g, ' ').trim()
+}
+
 function parseGuestBulkFinanceLine(line: string): ParsedLine | null {
-  const t = line.replace(/\t/g, ' ').trim()
+  const t = normalizePasteLine(line)
   if (!t) return null
   const tokens = t.split(/\s+/).filter(Boolean)
   const n = tokens.length
@@ -146,6 +151,38 @@ function generateUniqueCode(): string {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+function incomeRecipientRejectReason(
+  parsed: ParsedLine,
+  adminRows: AdminRow[],
+  eventStaff: StaffJson[],
+): string | null {
+  if (payboxToken(parsed.adminToken) && !firstPartnerId(adminRows)) {
+    return 'paybox_no_partner'
+  }
+  if (selectorKeywordToken(parsed.adminToken)) {
+    const scanList = scannersForEvent(eventStaff)
+    if (scanList.length === 0) return 'selector_no_scanner'
+    if (scanList.length > 1) return `selector_multiple_scanners:${scanList.length}`
+  }
+  return 'partner_not_found'
+}
+
+type BulkImportSummaryPayload = {
+  receivedLines: number
+  validWorkItems: number
+  skippedInvalidPhone: number
+  errors: string[]
+  added: number
+}
+
+function jsonWithSummary(
+  body: Record<string, unknown>,
+  summary: BulkImportSummaryPayload,
+  status: number,
+): Response {
+  return json({ ...body, ...summary }, status)
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { status: 200, headers: corsHeaders })
@@ -209,77 +246,173 @@ Deno.serve(async (req: Request) => {
   type WorkRow = { displayNum: number; parsed: ParsedLine; linePreview: string }
   const work: WorkRow[] = []
 
+  let receivedLines = 0
   let displayLineNum = 0
   for (let i = 0; i < rawLines.length; i++) {
     const raw = rawLines[i]!
-    if (!raw.trim()) continue
+    const trimmedLine = normalizePasteLine(raw)
+    const fileLineIndex = i + 1
+
+    if (!trimmedLine) {
+      console.log(
+        '[bulk-import-guests] line',
+        JSON.stringify({
+          eventId,
+          fileLineIndex,
+          displayLineNum: null,
+          rawLine: raw,
+          trimmedLine,
+          parsedName: null,
+          parsedPhone: null,
+          formattedPhone: null,
+          inWork: false,
+          reason: 'skipped_empty_line',
+        }),
+      )
+      continue
+    }
+
+    receivedLines += 1
     displayLineNum += 1
-    const parsed = parseGuestBulkFinanceLine(raw.trim())
+
+    const parsed = parseGuestBulkFinanceLine(raw)
     if (!parsed) {
       errors.push(
         `שורה ${displayLineNum}: פורמט שגוי — צריך: שם · טלפון · אדמין · סכום — ${shortLinePreview(raw)}`,
       )
+      console.log(
+        '[bulk-import-guests] line',
+        JSON.stringify({
+          eventId,
+          fileLineIndex,
+          displayLineNum,
+          rawLine: raw,
+          trimmedLine,
+          parsedName: null,
+          parsedPhone: null,
+          formattedPhone: null,
+          inWork: false,
+          reason: 'invalid_line_format',
+        }),
+      )
       continue
     }
+
+    const formattedPhone = formatIsraelMobileE164(parsed.phone)
     const resolved = resolveIncomeRecipientWithKind(parsed.adminToken, adminRows, eventStaff)
     if (!resolved) {
       if (payboxToken(parsed.adminToken) && !firstPartnerId(adminRows)) {
         errors.push(
           `שורה ${displayLineNum}: «פייבוקס» — אין שותף במערכת לשיוך; נדרש לפחות שותף אחד.`,
         )
-        continue
-      }
-      if (selectorKeywordToken(parsed.adminToken)) {
+      } else if (selectorKeywordToken(parsed.adminToken)) {
         const scanList = scannersForEvent(eventStaff)
         if (scanList.length === 0) {
           errors.push(
             `שורה ${displayLineNum}: «סלקטור»/«סורק» — לא הוגדר סורק לאירוע.`,
           )
-          continue
-        }
-        if (scanList.length > 1) {
+        } else if (scanList.length > 1) {
           errors.push(
             `שורה ${displayLineNum}: «סלקטור»/«סורק» — יש ${scanList.length} סורקים; כתבו שם קובל תשלום במקום «סלקטור».`,
           )
-          continue
         }
+      } else {
+        errors.push(
+          `שורה ${displayLineNum}: לא נמצא שותף ל־«${parsed.adminToken}» — ${shortLinePreview(raw)}`,
+        )
       }
-      errors.push(
-        `שורה ${displayLineNum}: לא נמצא שותף ל־«${parsed.adminToken}» — ${shortLinePreview(raw)}`,
+      const code = incomeRecipientRejectReason(parsed, adminRows, eventStaff)
+      console.log(
+        '[bulk-import-guests] line',
+        JSON.stringify({
+          eventId,
+          fileLineIndex,
+          displayLineNum,
+          rawLine: raw,
+          trimmedLine,
+          parsedName: parsed.name,
+          parsedPhone: parsed.phone,
+          formattedPhone,
+          inWork: false,
+          reason: code ?? 'income_recipient_unresolved',
+        }),
       )
       continue
     }
-    if (formatIsraelMobileE164(parsed.phone) === null) {
+
+    if (formattedPhone === null) {
       skippedInvalidPhone += 1
+      console.log(
+        '[bulk-import-guests] line',
+        JSON.stringify({
+          eventId,
+          fileLineIndex,
+          displayLineNum,
+          rawLine: raw,
+          trimmedLine,
+          parsedName: parsed.name,
+          parsedPhone: parsed.phone,
+          formattedPhone: null,
+          inWork: false,
+          reason: 'invalid_israeli_mobile',
+        }),
+      )
       continue
     }
+
     work.push({ displayNum: displayLineNum, parsed, linePreview: shortLinePreview(raw) })
+    console.log(
+      '[bulk-import-guests] line',
+      JSON.stringify({
+        eventId,
+        fileLineIndex,
+        displayLineNum,
+        rawLine: raw,
+        trimmedLine,
+        parsedName: parsed.name,
+        parsedPhone: parsed.phone,
+        formattedPhone,
+        inWork: true,
+        reason: 'accepted_into_work',
+      }),
+    )
   }
 
+  const summaryAfterParse = (): BulkImportSummaryPayload => ({
+    receivedLines,
+    validWorkItems: work.length,
+    skippedInvalidPhone,
+    errors: [...errors],
+    added: 0,
+  })
+
   if (errors.length > 0) {
-    return json({
-      ok: false as const,
-      added: 0,
-      skipped: 0,
-      skippedInvalidPhone,
-      queuedForWhatsapp: 0,
-      errors,
-      createdGuests: [],
-      financeLinesCreated: [],
-    }, 200)
+    return jsonWithSummary(
+      {
+        ok: false as const,
+        skipped: 0,
+        queuedForWhatsapp: 0,
+        createdGuests: [],
+        financeLinesCreated: [],
+      },
+      summaryAfterParse(),
+      200,
+    )
   }
 
   if (work.length === 0) {
-    return json({
-      ok: true as const,
-      added: 0,
-      skipped: 0,
-      skippedInvalidPhone,
-      queuedForWhatsapp: 0,
-      errors: [],
-      createdGuests: [],
-      financeLinesCreated: [],
-    }, 200)
+    return jsonWithSummary(
+      {
+        ok: true as const,
+        skipped: 0,
+        queuedForWhatsapp: 0,
+        errors: [],
+        createdGuests: [],
+        financeLinesCreated: [],
+      },
+      summaryAfterParse(),
+      200,
+    )
   }
 
   const createdGuests: Record<string, unknown>[] = []
@@ -338,6 +471,20 @@ Deno.serve(async (req: Request) => {
         errors.push(
           `שורה ${w.displayNum}: לא נשמר אורח — ${lastInsErr?.message ?? 'שגיאה'}`,
         )
+        console.log(
+          '[bulk-import-guests] line',
+          JSON.stringify({
+            eventId,
+            displayLineNum: w.displayNum,
+            phase: 'db_insert_guest',
+            inWork: false,
+            reason: 'guest_insert_failed',
+            detail: lastInsErr?.message ?? null,
+            parsedName: n.trim(),
+            parsedPhone: p.trim(),
+            formattedPhone: formatIsraelMobileE164(p.trim()),
+          }),
+        )
         continue
       }
       const guestId = String(guest.id)
@@ -364,6 +511,20 @@ Deno.serve(async (req: Request) => {
         await userSb.from('guests').delete().eq('id', guestId)
         errors.push(`שורה ${w.displayNum}: שמירת כספים נכשלה — ${finErr.message}`)
         added--
+        console.log(
+          '[bulk-import-guests] line',
+          JSON.stringify({
+            eventId,
+            displayLineNum: w.displayNum,
+            phase: 'db_insert_finance',
+            inWork: false,
+            reason: 'finance_insert_failed',
+            detail: finErr.message,
+            parsedName: n.trim(),
+            parsedPhone: p.trim(),
+            formattedPhone: formatIsraelMobileE164(p.trim()),
+          }),
+        )
         continue
       }
 
@@ -372,17 +533,35 @@ Deno.serve(async (req: Request) => {
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'שגיאה'
       errors.push(`שורה ${w.displayNum}: ${msg}`)
+      console.log(
+        '[bulk-import-guests] line',
+        JSON.stringify({
+          eventId,
+          displayLineNum: w.displayNum,
+          phase: 'db_insert',
+          inWork: false,
+          reason: 'exception',
+          detail: msg,
+        }),
+      )
     }
   }
 
-  return json({
-    ok: errors.length === 0,
-    added,
-    skipped: 0,
-    skippedInvalidPhone,
-    queuedForWhatsapp: 0,
-    errors,
-    createdGuests,
-    financeLinesCreated,
-  }, 200)
+  return jsonWithSummary(
+    {
+      ok: errors.length === 0,
+      skipped: 0,
+      queuedForWhatsapp: 0,
+      createdGuests,
+      financeLinesCreated,
+    },
+    {
+      receivedLines,
+      validWorkItems: work.length,
+      skippedInvalidPhone,
+      errors: [...errors],
+      added,
+    },
+    200,
+  )
 })

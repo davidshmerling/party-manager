@@ -67,6 +67,10 @@ export interface SendGuestTwilioSuccess {
 /** תוצאת ייבוא מרוכז מ־Edge Function ‎bulk-import-guests */
 export type BulkImportGuestsResult = {
   ok: boolean
+  /** שורות לא ריקות (אחרי trim) שנספרו בייבוא */
+  receivedLines: number
+  /** שורות שעברו ולידציה והוכנסו ל־work לפני ה־DB (או בסיום הפרסור לפני insert) */
+  validWorkItems: number
   added: number
   /** תמיד 0 — כפילות שורה ברשימה יוצרת כרטיס נוסף, לא דילוג */
   skipped: number

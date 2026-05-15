@@ -1200,6 +1200,8 @@ export function useGuestListPageModel() {
         eventId: currentEventId,
         detail: {
           added: result.added,
+          received_lines: result.receivedLines,
+          valid_work_items: result.validWorkItems,
           skipped: result.skipped,
           skipped_invalid_phone: result.skippedInvalidPhone,
           queued_for_whatsapp: result.queuedForWhatsapp,

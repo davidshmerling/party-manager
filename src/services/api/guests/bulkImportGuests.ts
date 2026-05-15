@@ -26,6 +26,8 @@ export async function bulkImportGuests(body: {
   const rawFin = Array.isArray(d.financeLinesCreated) ? d.financeLinesCreated : []
   return {
     ok: Boolean(d.ok),
+    receivedLines: typeof d.receivedLines === 'number' ? d.receivedLines : 0,
+    validWorkItems: typeof d.validWorkItems === 'number' ? d.validWorkItems : 0,
     added: d.added,
     skipped: typeof d.skipped === 'number' ? d.skipped : 0,
     skippedInvalidPhone:
