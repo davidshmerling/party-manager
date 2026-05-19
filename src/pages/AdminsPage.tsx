@@ -51,8 +51,24 @@ export function AdminsPage() {
     void load()
   }, [load])
 
+  /** שורת profiles קיימת — כולל member (משתמש ציבורי) שנוצרה בהרשמה */
   function hasProfile(r: AdminUserRow) {
-    return r.is_partner || r.profile_role === 'admin' || r.profile_role === 'scanner'
+    const role = r.profile_role
+    return (
+      r.is_partner ||
+      role === 'admin' ||
+      role === 'scanner' ||
+      role === 'member'
+    )
+  }
+
+  /** אדמין / שותף / סורק (scanner במערכת) — לא כולל member ולא מי ללא תפקיד גלובלי */
+  function canPromote(r: AdminUserRow) {
+    if (r.is_partner) return false
+    const role = r.profile_role
+    if (role === 'admin') return false
+    if (role === 'scanner') return false
+    return true
   }
 
   async function onPromote(userId: string) {
@@ -96,7 +112,7 @@ export function AdminsPage() {
 
   async function onSaveDisplayName(r: AdminUserRow) {
     if (!hasProfile(r)) {
-      showToast('err', 'אין שורת פרופיל — יש לבחור דרגה (שותף, אדמין או סורק)')
+      showToast('err', 'אין שורת פרופיל במערכת — לא ניתן לשמור שם תצוגה')
       return
     }
     const id = r.user_id
@@ -174,7 +190,7 @@ export function AdminsPage() {
                 const isPartner = r.is_partner
                 const isTierAdmin = r.profile_role === 'admin' && !r.is_partner
                 const isScanner = r.profile_role === 'scanner'
-                const hasNoRole = !r.profile_role && !r.is_partner
+                const promoteRow = canPromote(r)
                 const canRemovePartner = isPartner && partnerCount > 1
 
                 return (
@@ -197,7 +213,7 @@ export function AdminsPage() {
                           title={
                             canEditName
                               ? 'ערוך שם — השמירה ביציאה מהשדה (או Enter)'
-                              : 'הגדירו דרגה כדי לשמור שם תצוגה'
+                              : 'אין פרופיל — לא ניתן לשמור שם תצוגה'
                           }
                           placeholder="שם"
                           autoComplete="off"
@@ -259,7 +275,7 @@ export function AdminsPage() {
                           הפוך לאדמין
                         </button>
                       )}
-                      {hasNoRole && (
+                      {promoteRow && (
                         <>
                           <button
                             type="button"
