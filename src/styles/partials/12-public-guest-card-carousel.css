@@ -411,6 +411,42 @@
   color: #3f3f46;
 }
 
+.guest-card-terms {
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  text-align: center;
+  font-size: 0.7rem;
+  line-height: 1.42;
+  color: #71717a;
+}
+
+.guest-card-box--glass .guest-card-terms {
+  border-top-color: rgba(255, 255, 255, 0.14);
+  color: rgba(250, 250, 250, 0.72);
+}
+
+.guest-card-terms__title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.73rem;
+  color: #52525b;
+}
+
+.guest-card-box--glass .guest-card-terms__title {
+  color: rgba(250, 250, 250, 0.88);
+}
+
+.guest-card-terms__body {
+  margin: 0;
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
+.guest-card-terms__body--solo {
+  font-weight: 500;
+}
+
 .guest-card-instruction {
   margin: 0 0 0.25rem;
 }

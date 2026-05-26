@@ -13,6 +13,7 @@ export async function fetchGuestCardPublic(
   card_text_above: string | null
   card_text_instruction: string | null
   card_text_below: string | null
+  card_text_terms: string | null
 }> {
   const recordOpen = options?.recordOpen !== false
   const rpcName = recordOpen ? 'get_public_ticket' : 'get_public_ticket_no_open_record'
@@ -35,6 +36,7 @@ export async function fetchGuestCardPublic(
     card_text_above?: string | null
     card_text_instruction?: string | null
     card_text_below?: string | null
+    card_text_terms?: string | null
   }
   if (!j.name || !j.code) throw new Error('לא נמצא')
   let sibling_codes: string[] = []
@@ -58,6 +60,9 @@ export async function fetchGuestCardPublic(
     card_text_below: normalizeCardTextField(
       j.card_text_below != null ? String(j.card_text_below) : null,
     ),
+    card_text_terms: normalizeCardTextField(
+      j.card_text_terms != null ? String(j.card_text_terms) : null,
+    ),
   }
 }
 
@@ -70,17 +75,19 @@ export async function mergeGuestCardTextsFromEventRow(
     card_text_above: string | null
     card_text_instruction: string | null
     card_text_below: string | null
+    card_text_terms: string | null
   },
 ): Promise<typeof texts> {
   const a = normalizeCardTextField(texts.card_text_above)
   const i = normalizeCardTextField(texts.card_text_instruction)
   const b = normalizeCardTextField(texts.card_text_below)
+  const t = normalizeCardTextField(texts.card_text_terms)
   if (!eventId) {
-    return { card_text_above: a, card_text_instruction: i, card_text_below: b }
+    return { card_text_above: a, card_text_instruction: i, card_text_below: b, card_text_terms: t }
   }
-  const need = a == null || i == null || b == null
+  const need = a == null || i == null || b == null || t == null
   if (!need) {
-    return { card_text_above: a, card_text_instruction: i, card_text_below: b }
+    return { card_text_above: a, card_text_instruction: i, card_text_below: b, card_text_terms: t }
   }
   try {
     const ev = await fetchEventRow(eventId)
@@ -88,9 +95,10 @@ export async function mergeGuestCardTextsFromEventRow(
       card_text_above: a ?? normalizeCardTextField(ev.card_text_above),
       card_text_instruction: i ?? normalizeCardTextField(ev.card_text_instruction),
       card_text_below: b ?? normalizeCardTextField(ev.card_text_below),
+      card_text_terms: t ?? normalizeCardTextField(ev.card_text_terms),
     }
   } catch {
-    return { card_text_above: a, card_text_instruction: i, card_text_below: b }
+    return { card_text_above: a, card_text_instruction: i, card_text_below: b, card_text_terms: t }
   }
 }
 

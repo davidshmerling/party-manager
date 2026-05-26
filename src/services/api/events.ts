@@ -8,7 +8,7 @@ import { mapEventRow } from './mappers'
 
 /** עמודות ל־mapEventRow (רשימת אירועים / בודד) — בלי `*` */
 const EVENT_ROW_COLUMNS =
-  'id, name, slug, description, starts_at, ends_at, location, is_active, created_by, card_text_above, card_text_instruction, card_text_below, whatsapp_invite_template, whatsapp_twilio_content_sid, whatsapp_twilio_content_name, whatsapp_twilio_content_status, whatsapp_twilio_content_category, whatsapp_twilio_content_submitted_at, whatsapp_twilio_placeholder_slots, default_ticket_price, created_at, updated_at'
+  'id, name, slug, description, starts_at, ends_at, location, is_active, created_by, card_text_above, card_text_instruction, card_text_below, card_text_terms, whatsapp_invite_template, whatsapp_twilio_content_sid, whatsapp_twilio_content_name, whatsapp_twilio_content_status, whatsapp_twilio_content_category, whatsapp_twilio_content_submitted_at, whatsapp_twilio_placeholder_slots, default_ticket_price, created_at, updated_at'
 
 export async function fetchEventRow(eventId: string): Promise<EventRow> {
   const { data, error } = await sb()
@@ -29,6 +29,7 @@ export async function updateEventCardTexts(
       | 'card_text_above'
       | 'card_text_instruction'
       | 'card_text_below'
+      | 'card_text_terms'
       | 'whatsapp_invite_template'
       | 'default_ticket_price'
     >
@@ -40,6 +41,7 @@ export async function updateEventCardTexts(
     patch.card_text_instruction = body.card_text_instruction?.trim() || null
   }
   if (body.card_text_below !== undefined) patch.card_text_below = body.card_text_below?.trim() || null
+  if (body.card_text_terms !== undefined) patch.card_text_terms = body.card_text_terms?.trim() || null
   if (body.whatsapp_invite_template !== undefined) {
     patch.whatsapp_invite_template = body.whatsapp_invite_template?.trim() || null
   }

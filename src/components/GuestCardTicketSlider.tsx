@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { GuestCardQrBlock, GuestCardTextsHeader, GuestCardVisual } from './GuestCardVisual'
+import { GuestCardQrBlock, GuestCardTermsFooter, GuestCardTextsHeader, GuestCardVisual } from './GuestCardVisual'
 import { guestCardUrl } from '../services/api'
 import { isCardTextLineSuppressed, normalizeCardTextField } from '../utils/cardText'
 
@@ -43,6 +43,7 @@ export type GuestCardTicketSliderProps = {
   textAbove?: string | null
   textInstruction?: string | null
   textBelow?: string | null
+  textTerms?: string | null
   /** כרטיס ציבורי — glass; תצוגה מקדימה באדמין — default */
   variant?: 'default' | 'glass'
 }
@@ -55,6 +56,7 @@ export function GuestCardTicketSlider({
   textAbove,
   textInstruction,
   textBelow,
+  textTerms,
   variant = 'default',
 }: GuestCardTicketSliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null)
@@ -147,6 +149,7 @@ export function GuestCardTicketSlider({
             textAbove={textAbove}
             textInstruction={textInstruction}
             textBelow={textBelow}
+            textTerms={textTerms}
           />
         </div>
       </div>
@@ -198,6 +201,7 @@ export function GuestCardTicketSlider({
             {below}
           </p>
         ) : null}
+        <GuestCardTermsFooter textTerms={textTerms} />
       </div>
     </div>
   )

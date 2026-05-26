@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { GuestCardTicketSlider } from '../components/GuestCardTicketSlider'
 import { useEvent } from '../context/EventContext'
 import { fetchEventRow, fetchPreviewGuestGroupForEvent, updateEventCardTexts } from '../services/api'
+import { DEFAULT_CARD_TEXT_TERMS } from '../utils/cardText'
 import type { Guest } from '../types/guest'
 import { groupGuestsByIdentity } from '../utils/guestIdentity'
 
@@ -15,6 +16,7 @@ export function EventCardPreviewPage() {
   const [above, setAbove] = useState('')
   const [instruction, setInstruction] = useState('')
   const [below, setBelow] = useState('')
+  const [terms, setTerms] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -30,6 +32,7 @@ export function EventCardPreviewPage() {
       setAbove(ev.card_text_above ?? '')
       setInstruction(ev.card_text_instruction ?? '')
       setBelow(ev.card_text_below ?? '')
+      setTerms(ev.card_text_terms ?? '')
       const guests = await fetchPreviewGuestGroupForEvent(eventId)
       setPreviewGuests(guests)
     } catch (e) {
@@ -67,6 +70,7 @@ export function EventCardPreviewPage() {
         card_text_above: above.trim() || null,
         card_text_instruction: instruction.trim() || null,
         card_text_below: below.trim() || null,
+        card_text_terms: terms.trim() || null,
       })
       await refreshEvents()
     } catch (e) {
@@ -101,7 +105,8 @@ export function EventCardPreviewPage() {
             <p className="muted small dash-card-lead">
               בכרטיס האמיתי מופיע שם האורח אחרי הברכה (שונה לכל אורח); שאר הניסוח משותף לכולם. כאן:{' '}
               <strong>{DEMO_NAME}</strong> לדוגמה. ברכה ריקה = «היי»; משפט לפני ה-QR ריק = ברירת מחדל (כניסה). סימן «.»
-              בלבד בשדה = ללא אותה שורה (לא ברירת מחדל).
+              בלבד בשדה = ללא אותה שורה (לא ברירת מחדל). <strong>תנאי שימוש בתחתית:</strong> שדה ריק במסד = הנוסח
+              המוכן מראש למטה; «.» בלבד בתיבה = הסתרה לגמרי (שמירה בשדה הריק מאפשרת לחזור לברירת המחדל).
             </p>
             <label className="event-card-field">
               <span>ברכה לפני השם (ברירת מחדל: היי)</span>
@@ -134,6 +139,17 @@ export function EventCardPreviewPage() {
                 value={below}
                 onChange={(e) => setBelow(e.target.value)}
                 placeholder="למשל: שמרו את המסך בטלפון"
+              />
+            </label>
+            <label className="event-card-field">
+              <span>תנאי שימוש (בתחתית הכרטיס — קטן יותר מהשאר)</span>
+              <textarea
+                className="input"
+                rows={4}
+                dir="rtl"
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+                placeholder={DEFAULT_CARD_TEXT_TERMS}
               />
             </label>
 
@@ -182,6 +198,7 @@ export function EventCardPreviewPage() {
                       textAbove={above.trim() || null}
                       textInstruction={instruction.trim() || null}
                       textBelow={below.trim() || null}
+                      textTerms={terms.trim() || null}
                       variant="glass"
                     />
                   </div>

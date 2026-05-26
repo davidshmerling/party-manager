@@ -71,6 +71,9 @@ export function mapEventRow(row: Record<string, unknown>): EventRow {
     card_text_below: normalizeCardTextField(
       row.card_text_below != null ? String(row.card_text_below) : null,
     ),
+    card_text_terms: normalizeCardTextField(
+      row.card_text_terms != null ? String(row.card_text_terms) : null,
+    ),
     whatsapp_invite_template:
       row.whatsapp_invite_template != null ? String(row.whatsapp_invite_template) : null,
     whatsapp_twilio_content_sid:

@@ -12,6 +12,8 @@ export interface EventRow {
   card_text_above: string | null
   card_text_instruction: string | null
   card_text_below: string | null
+  /** תנאי שימוש / צילום בתחתית הכרטיס; null = ברירת מחדל בלקוח */
+  card_text_terms: string | null
   /** תבנית wa.me — {name} {link} (אופציונלי {event}); null = ברירת מחדל */
   whatsapp_invite_template: string | null
   /** Twilio Content SID לאחר יצירת תבנית ושליחה לאישור Meta */

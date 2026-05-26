@@ -19,6 +19,7 @@ type CardPayload = {
   card_text_above: string | null
   card_text_instruction: string | null
   card_text_below: string | null
+  card_text_terms: string | null
 }
 
 export function GuestCardPage() {
@@ -47,15 +48,18 @@ export function GuestCardPage() {
         let card_text_above = data.card_text_above
         let card_text_instruction = data.card_text_instruction
         let card_text_below = data.card_text_below
+        let card_text_terms = data.card_text_terms
         if (session) {
           const merged = await mergeGuestCardTextsFromEventRow(data.event_id, {
             card_text_above,
             card_text_instruction,
             card_text_below,
+            card_text_terms,
           })
           card_text_above = merged.card_text_above
           card_text_instruction = merged.card_text_instruction
           card_text_below = merged.card_text_below
+          card_text_terms = merged.card_text_terms
         }
         if (cancelled) return
         const codes = data.sibling_codes.length ? [...new Set(data.sibling_codes)] : [data.code]
@@ -67,6 +71,7 @@ export function GuestCardPage() {
           card_text_above,
           card_text_instruction,
           card_text_below,
+          card_text_terms,
         })
         if (!staffPreview) {
           try {
@@ -104,6 +109,7 @@ export function GuestCardPage() {
             textAbove={payload.card_text_above}
             textInstruction={payload.card_text_instruction}
             textBelow={payload.card_text_below}
+            textTerms={payload.card_text_terms}
             variant="glass"
           />
         </>

@@ -1,5 +1,9 @@
 import { QRCodeSVG } from 'qrcode.react'
-import { isCardTextLineSuppressed, normalizeCardTextField } from '../utils/cardText'
+import {
+  isCardTextLineSuppressed,
+  normalizeCardTextField,
+  resolveCardTermsDisplayText,
+} from '../utils/cardText'
 
 const DEFAULT_GREETING = 'היי'
 const DEFAULT_INSTRUCTION = 'הציגו את ה-QR בכניסה לאירוע'
@@ -44,12 +48,35 @@ export function GuestCardQrBlock({ ticketUrl }: { ticketUrl: string }) {
   )
 }
 
+/** תנאי שימוש בתחתית הכרטיס — אחרי שאר הכיתובים; גופן קטן יחסית */
+export function GuestCardTermsFooter({ textTerms }: { textTerms?: string | null }) {
+  const resolved = resolveCardTermsDisplayText(textTerms)
+  if (!resolved) return null
+  const nl = resolved.indexOf('\n')
+  if (nl === -1) {
+    return (
+      <div className="guest-card-terms" dir="rtl">
+        <p className="guest-card-terms__body guest-card-terms__body--solo">{resolved}</p>
+      </div>
+    )
+  }
+  const title = resolved.slice(0, nl).trim()
+  const body = resolved.slice(nl + 1).trim()
+  return (
+    <div className="guest-card-terms" dir="rtl">
+      {title ? <p className="guest-card-terms__title">{title}</p> : null}
+      {body ? <p className="guest-card-terms__body">{body}</p> : null}
+    </div>
+  )
+}
+
 export type GuestCardVisualProps = {
   guestName: string
   ticketUrl: string
   textAbove?: string | null
   textInstruction?: string | null
   textBelow?: string | null
+  textTerms?: string | null
   /** כרטיס ציבורי — מראה זכוכית (glass) */
   variant?: 'default' | 'glass'
 }
@@ -61,6 +88,7 @@ export function GuestCardVisual({
   textAbove,
   textInstruction,
   textBelow,
+  textTerms,
   variant = 'default',
 }: GuestCardVisualProps) {
   const boxClass = variant === 'glass' ? 'guest-card-box guest-card-box--glass' : 'guest-card-box'
@@ -71,6 +99,7 @@ export function GuestCardVisual({
       <GuestCardTextsHeader guestName={guestName} textAbove={textAbove} textInstruction={textInstruction} />
       <GuestCardQrBlock ticketUrl={ticketUrl} />
       {below ? <p className="guest-card-text-block guest-card-text-below">{below}</p> : null}
+      <GuestCardTermsFooter textTerms={textTerms} />
     </div>
   )
 }
