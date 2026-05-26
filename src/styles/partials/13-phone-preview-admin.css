@@ -111,6 +111,10 @@
   font-weight: 600;
 }
 
+.event-card-preview-editor .event-card-inline-link-hint {
+  margin: 0 0 0.35rem;
+}
+
 .event-card-preview-editor textarea.input {
   width: 100%;
   min-height: 2.5rem;

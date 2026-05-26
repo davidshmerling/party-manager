@@ -132,6 +132,9 @@ export function EventCardPreviewPage() {
             </label>
             <label className="event-card-field">
               <span>טקסט מתחת ל-QR</span>
+              <p className="muted small event-card-inline-link-hint">
+                כתובות כמו ‎<code dir="ltr">app.com/...</code> או ‎<code dir="ltr">https://...</code> מוצגות אוטומטית כקישור נפתח.
+              </p>
               <textarea
                 className="input"
                 rows={3}

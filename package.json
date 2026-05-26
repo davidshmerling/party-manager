@@ -19,6 +19,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "fflate": "^0.8.2",
     "html5-qrcode": "^2.3.8",
+    "linkify-it": "^5.0.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -411,30 +411,61 @@
   color: #3f3f46;
 }
 
+.guest-card-inline-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  word-break: break-word;
+}
+
+.guest-card-inline-link:visited {
+  color: #7c3aed;
+}
+
+.guest-card-box--glass .guest-card-inline-link {
+  color: #1d4ed8;
+}
+
+.guest-card-box--glass .guest-card-inline-link:visited {
+  color: #6d28d9;
+}
+
+/* סימון עדין שזה קישור חיצוני (נשמר גם בסביבות שבהן צבע מוסתר) */
+.guest-card-inline-link::after {
+  content: ' \2197';
+  font-size: 0.85em;
+  text-decoration: none;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
 .guest-card-terms {
   margin-top: 0.85rem;
   padding-top: 0.65rem;
-  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  border-top: 1px solid rgba(24, 24, 27, 0.12);
   text-align: center;
-  font-size: 0.7rem;
-  line-height: 1.42;
-  color: #71717a;
+  /* קטן מטקסט הכרטיס (~0.95rem), אך קריא */
+  font-size: 0.8rem;
+  line-height: 1.48;
+  color: #475569;
 }
 
+/* כרטיס glass — הרקוע הציבורי/פריוויו בהירים; טקסט כהה כמו יתר הכרטיס */
 .guest-card-box--glass .guest-card-terms {
-  border-top-color: rgba(255, 255, 255, 0.14);
-  color: rgba(250, 250, 250, 0.72);
+  border-top-color: rgba(15, 23, 42, 0.12);
+  color: #475569;
 }
 
 .guest-card-terms__title {
   margin: 0 0 0.35rem;
   font-weight: 600;
-  font-size: 0.73rem;
-  color: #52525b;
+  font-size: 0.82rem;
+  color: #334155;
 }
 
 .guest-card-box--glass .guest-card-terms__title {
-  color: rgba(250, 250, 250, 0.88);
+  color: #334155;
 }
 
 .guest-card-terms__body {

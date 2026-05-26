@@ -1,4 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
+import { renderGuestCardLinkifiedText } from './GuestCardLinkifiedText'
 import {
   isCardTextLineSuppressed,
   normalizeCardTextField,
@@ -35,7 +36,9 @@ export function GuestCardTextsHeader({ guestName, textAbove, textInstruction }: 
         ) : null}
         <span className="guest-card-name-part">{guestName}</span>
       </h1>
-      {instruction ? <p className="muted small guest-card-instruction">{instruction}</p> : null}
+      {instruction ? (
+        <p className="muted small guest-card-instruction">{renderGuestCardLinkifiedText(instruction)}</p>
+      ) : null}
     </>
   )
 }
@@ -56,7 +59,7 @@ export function GuestCardTermsFooter({ textTerms }: { textTerms?: string | null 
   if (nl === -1) {
     return (
       <div className="guest-card-terms" dir="rtl">
-        <p className="guest-card-terms__body guest-card-terms__body--solo">{resolved}</p>
+        <p className="guest-card-terms__body guest-card-terms__body--solo">{renderGuestCardLinkifiedText(resolved)}</p>
       </div>
     )
   }
@@ -64,8 +67,8 @@ export function GuestCardTermsFooter({ textTerms }: { textTerms?: string | null 
   const body = resolved.slice(nl + 1).trim()
   return (
     <div className="guest-card-terms" dir="rtl">
-      {title ? <p className="guest-card-terms__title">{title}</p> : null}
-      {body ? <p className="guest-card-terms__body">{body}</p> : null}
+      {title ? <p className="guest-card-terms__title">{renderGuestCardLinkifiedText(title)}</p> : null}
+      {body ? <p className="guest-card-terms__body">{renderGuestCardLinkifiedText(body)}</p> : null}
     </div>
   )
 }
@@ -98,7 +101,9 @@ export function GuestCardVisual({
     <div className={boxClass}>
       <GuestCardTextsHeader guestName={guestName} textAbove={textAbove} textInstruction={textInstruction} />
       <GuestCardQrBlock ticketUrl={ticketUrl} />
-      {below ? <p className="guest-card-text-block guest-card-text-below">{below}</p> : null}
+      {below ? (
+        <p className="guest-card-text-block guest-card-text-below">{renderGuestCardLinkifiedText(below)}</p>
+      ) : null}
       <GuestCardTermsFooter textTerms={textTerms} />
     </div>
   )

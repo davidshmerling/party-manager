@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { GuestCardQrBlock, GuestCardTermsFooter, GuestCardTextsHeader, GuestCardVisual } from './GuestCardVisual'
+import { renderGuestCardLinkifiedText } from './GuestCardLinkifiedText'
 import { guestCardUrl } from '../services/api'
 import { isCardTextLineSuppressed, normalizeCardTextField } from '../utils/cardText'
 
@@ -198,7 +199,7 @@ export function GuestCardTicketSlider({
         </div>
         {below ? (
           <p className="guest-card-text-block guest-card-text-below guest-card-text-below--after-slider">
-            {below}
+            {renderGuestCardLinkifiedText(below)}
           </p>
         ) : null}
         <GuestCardTermsFooter textTerms={textTerms} />
