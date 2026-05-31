@@ -2,12 +2,12 @@
   "redirects": [
     {
       "source": "/wa",
-      "destination": "https://chat.whatsapp.com/EFtkXD2glEO79RyBd0WPu5?mode=gi_t3D%3D&utm_source",
+      "destination": "https://chat.whatsapp.com/FswxF8Pmz3P3aUPSFedCp4?mode=gi_t",
       "permanent": false
     },
     {
       "source": "/whatsapp",
-      "destination": "https://chat.whatsapp.com/EFtkXD2glEO79RyBd0WPu5?mode=gi_t3D%3D&utm_source",
+      "destination": "https://chat.whatsapp.com/FswxF8Pmz3P3aUPSFedCp4?mode=gi_t",
       "permanent": false
     },
     {
