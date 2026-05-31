@@ -1,4 +1,26 @@
 {
+  "redirects": [
+    {
+      "source": "/wa",
+      "destination": "https://chat.whatsapp.com/EFtkXD2glEO79RyBd0WPu5?mode=gi_t3D%3D&utm_source",
+      "permanent": false
+    },
+    {
+      "source": "/whatsapp",
+      "destination": "https://chat.whatsapp.com/EFtkXD2glEO79RyBd0WPu5?mode=gi_t3D%3D&utm_source",
+      "permanent": false
+    },
+    {
+      "source": "/ig",
+      "destination": "https://www.instagram.com/tchernikhovsky_5?igsh=cGxoMmc2d3Y1Njl5",
+      "permanent": false
+    },
+    {
+      "source": "/instagram",
+      "destination": "https://www.instagram.com/tchernikhovsky_5?igsh=cGxoMmc2d3Y1Njl5",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
     { "source": "/images/:path*", "destination": "/images/:path*" },
